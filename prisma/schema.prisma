@@ -1,0 +1,244 @@
+// Rollup Properties — data model (BRIEF.md §7)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SEEKER
+  LISTER
+  VERIFIER
+  ADMIN
+}
+
+enum ListingPurpose {
+  RENT
+  SALE
+}
+
+enum PropertyType {
+  BEDSITTER
+  STUDIO
+  APARTMENT
+  MAISONETTE
+  BUNGALOW
+  TOWNHOUSE
+  COMMERCIAL
+  LAND
+}
+
+enum ListingStatus {
+  DRAFT
+  SUBMITTED
+  IN_VERIFICATION
+  NEEDS_INFO
+  REJECTED
+  LIVE
+  TAKEN
+  EXPIRED
+  SUSPENDED
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  NEEDS_INFO
+}
+
+enum PaymentProvider {
+  PAYSTACK
+  MPESA
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentPurpose {
+  UNLOCK
+  BUNDLE
+  FEATURED
+  SUBSCRIPTION
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWED
+  DISMISSED
+  ACTIONED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  phone         String    @unique
+  email         String?   @unique
+  passwordHash  String
+  role          Role      @default(SEEKER)
+  idNumber      String?
+  idVerifiedAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  listings      Listing[]      @relation("ListerListings")
+  verifications Verification[]
+  unlocks       Unlock[]
+  payments      Payment[]
+  savedListings SavedListing[]
+  savedSearches SavedSearch[]
+  reports       Report[]
+}
+
+model Area {
+  id       String    @id @default(cuid())
+  county   String
+  town     String
+  name     String
+  slug     String    @unique
+  listings Listing[]
+
+  @@unique([county, town, name])
+  @@index([town])
+}
+
+model Listing {
+  id               String         @id @default(cuid())
+  listerId         String
+  lister           User           @relation("ListerListings", fields: [listerId], references: [id])
+  title            String
+  slug             String         @unique
+  description      String
+  purpose          ListingPurpose
+  propertyType     PropertyType
+  priceKes         Int
+  depositKes       Int?
+  serviceChargeKes Int?
+  county           String
+  town             String
+  areaId           String?
+  area             Area?          @relation(fields: [areaId], references: [id])
+  estate           String?
+  streetAddress    String
+  lat              Float?
+  lng              Float?
+  bedrooms         Int            @default(0)
+  bathrooms        Int            @default(0)
+  furnished        Boolean        @default(false)
+  amenities        String[]
+  status           ListingStatus  @default(DRAFT)
+  verifiedAt       DateTime?
+  verifiedById     String?
+  expiresAt        DateTime?
+  viewCount        Int            @default(0)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  images        ListingImage[]
+  verifications Verification[]
+  unlocks       Unlock[]
+  payments      Payment[]
+  savedBy       SavedListing[]
+  reports       Report[]
+
+  @@index([status, purpose, town])
+  @@index([areaId])
+  @@index([priceKes])
+}
+
+model ListingImage {
+  id        String  @id @default(cuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url       String
+  publicId  String
+  position  Int     @default(0)
+  isCover   Boolean @default(false)
+}
+
+model Verification {
+  id           String             @id @default(cuid())
+  listingId    String
+  listing      Listing            @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  verifierId   String
+  verifier     User               @relation(fields: [verifierId], references: [id])
+  status       VerificationStatus @default(PENDING)
+  notes        String?
+  evidenceUrls String[]
+  createdAt    DateTime           @default(now())
+}
+
+model Unlock {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id])
+  paymentId String?  @unique
+  payment   Payment? @relation(fields: [paymentId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+}
+
+model Payment {
+  id           String          @id @default(cuid())
+  userId       String
+  user         User            @relation(fields: [userId], references: [id])
+  listingId    String?
+  listing      Listing?        @relation(fields: [listingId], references: [id])
+  amountKes    Int
+  provider     PaymentProvider @default(PAYSTACK)
+  providerRef  String          @unique
+  phone        String?
+  status       PaymentStatus   @default(PENDING)
+  purpose      PaymentPurpose  @default(UNLOCK)
+  refundedAt   DateTime?
+  refundReason String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  unlock Unlock?
+
+  @@index([listingId])
+  @@index([status])
+}
+
+model SavedListing {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, listingId])
+}
+
+model SavedSearch {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  filtersJson   Json
+  alertsEnabled Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model Report {
+  id         String       @id @default(cuid())
+  listingId  String
+  listing    Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User         @relation(fields: [reporterId], references: [id])
+  reason     String
+  details    String?
+  status     ReportStatus @default(OPEN)
+  createdAt  DateTime     @default(now())
+}
