@@ -29,6 +29,8 @@ type ExistingListing = {
   depositKes: number | null;
   serviceChargeKes: number | null;
   sizeSqm: number | null;
+  tourEmbedUrl: string | null;
+  videoUrl: string | null;
   areaId: string | null;
   estate: string | null;
   streetAddress: string;
@@ -202,6 +204,40 @@ export function ListingForm({
               />
               Furnished
             </Label>
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Tour & video (optional)</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            A 3D walkthrough or video tour leads the listing page, above the photos — the single
+            biggest thing that builds trust with a remote or first-time viewer.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="tourEmbedUrl">3D tour link</Label>
+            <Input
+              id="tourEmbedUrl"
+              name="tourEmbedUrl"
+              type="url"
+              placeholder="https://my.matterport.com/show/?m=…"
+              defaultValue={listing?.tourEmbedUrl ?? ""}
+            />
+            <p className="text-xs text-muted-foreground">Matterport, Kuula, Momento360 or CloudPano.</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="videoUrl">Video tour link</Label>
+            <Input
+              id="videoUrl"
+              name="videoUrl"
+              type="url"
+              placeholder="https://youtube.com/watch?v=… or https://vimeo.com/…"
+              defaultValue={listing?.videoUrl ?? ""}
+            />
+            <p className="text-xs text-muted-foreground">YouTube or Vimeo link.</p>
           </div>
         </div>
       </section>

@@ -153,10 +153,33 @@ export default async function ListingDetailPage({
         </div>
       )}
 
+      {/* Tour/video leads the page, ranked above photos (spec: immersive media first). */}
+      {(listing.tourEmbedUrl || listing.videoUrl) && (
+        <div className="relative mb-2 aspect-video overflow-hidden rounded-2xl bg-muted">
+          <iframe
+            src={listing.tourEmbedUrl ?? listing.videoUrl ?? undefined}
+            title={listing.tourEmbedUrl ? `${listing.title} — 3D tour` : `${listing.title} — video tour`}
+            loading="lazy"
+            allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen"
+            allowFullScreen
+            className="absolute inset-0 size-full border-0"
+          />
+        </div>
+      )}
+
       {listing.images.length > 0 ? (
         <div className="grid grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl">
           <div className="relative col-span-4 row-span-2 aspect-video sm:col-span-2 sm:row-span-2">
-            {cover && <Image src={cover.url} alt={listing.title} fill sizes="600px" className="object-cover" priority />}
+            {cover && (
+              <Image
+                src={cover.url}
+                alt={listing.title}
+                fill
+                sizes="600px"
+                className="object-cover"
+                priority={!listing.tourEmbedUrl && !listing.videoUrl}
+              />
+            )}
           </div>
           {gallery.slice(0, 4).map((img) => (
             <div key={img.id} className="relative col-span-2 row-span-1 hidden aspect-square sm:block">
@@ -164,11 +187,11 @@ export default async function ListingDetailPage({
             </div>
           ))}
         </div>
-      ) : (
+      ) : !listing.tourEmbedUrl && !listing.videoUrl ? (
         <div className="flex aspect-video items-center justify-center rounded-2xl bg-muted text-sm text-muted-foreground">
           No photos yet
         </div>
-      )}
+      ) : null}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">

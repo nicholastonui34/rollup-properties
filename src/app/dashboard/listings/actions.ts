@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 import { deleteCloudinaryImage } from "@/lib/cloudinary";
 import { MIN_LISTING_PHOTOS } from "@/lib/listing-options";
+import { isAllowedTourUrl, toVideoEmbedUrl } from "@/lib/media-embed";
 
 export type ListingFormState = { error?: string } | undefined;
 
@@ -29,6 +30,22 @@ const listingSchema = z.object({
   depositKes: z.coerce.number().int().nonnegative().optional().or(z.nan().transform(() => undefined)),
   serviceChargeKes: z.coerce.number().int().nonnegative().optional().or(z.nan().transform(() => undefined)),
   sizeSqm: z.coerce.number().int().positive().optional().or(z.nan().transform(() => undefined)),
+  tourEmbedUrl: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v ? v : undefined))
+    .refine((v) => v === undefined || isAllowedTourUrl(v), {
+      message: "Tour link must be a Matterport, Kuula, Momento360 or CloudPano URL",
+    }),
+  videoUrl: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v ? v : undefined))
+    .refine((v) => v === undefined || toVideoEmbedUrl(v) !== null, {
+      message: "Video link must be a YouTube or Vimeo URL",
+    }),
   areaId: z.string().min(1, "Select an area"),
   estate: z.string().trim().optional(),
   streetAddress: z.string().trim().min(3, "Enter a street address or landmark"),
@@ -56,6 +73,8 @@ function parseListingForm(formData: FormData) {
     depositKes: formData.get("depositKes") || undefined,
     serviceChargeKes: formData.get("serviceChargeKes") || undefined,
     sizeSqm: formData.get("sizeSqm") || undefined,
+    tourEmbedUrl: formData.get("tourEmbedUrl") || undefined,
+    videoUrl: formData.get("videoUrl") || undefined,
     areaId: formData.get("areaId"),
     estate: formData.get("estate"),
     streetAddress: formData.get("streetAddress"),
@@ -106,6 +125,8 @@ export async function createListingAction(
         depositKes: parsed.data.depositKes ?? null,
         serviceChargeKes: parsed.data.serviceChargeKes ?? null,
         sizeSqm: parsed.data.sizeSqm ?? null,
+        tourEmbedUrl: parsed.data.tourEmbedUrl ?? null,
+        videoUrl: parsed.data.videoUrl ? toVideoEmbedUrl(parsed.data.videoUrl) : null,
         county: area.county,
         town: area.town,
         areaId: area.id,
@@ -158,6 +179,8 @@ export async function updateListingAction(
         depositKes: parsed.data.depositKes ?? null,
         serviceChargeKes: parsed.data.serviceChargeKes ?? null,
         sizeSqm: parsed.data.sizeSqm ?? null,
+        tourEmbedUrl: parsed.data.tourEmbedUrl ?? null,
+        videoUrl: parsed.data.videoUrl ? toVideoEmbedUrl(parsed.data.videoUrl) : null,
         county: area.county,
         town: area.town,
         areaId: area.id,

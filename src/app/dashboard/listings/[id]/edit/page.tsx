@@ -92,6 +92,8 @@ export default async function EditListingPage({
             depositKes: listing.depositKes,
             serviceChargeKes: listing.serviceChargeKes,
             sizeSqm: listing.sizeSqm,
+            tourEmbedUrl: listing.tourEmbedUrl,
+            videoUrl: listing.videoUrl,
             areaId: listing.areaId,
             estate: listing.estate,
             streetAddress: listing.streetAddress,

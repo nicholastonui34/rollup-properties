@@ -124,6 +124,8 @@ model Listing {
   depositKes       Int?
   serviceChargeKes Int?
   sizeSqm          Int?
+  tourEmbedUrl     String?
+  videoUrl         String?
   county           String
   town             String
   areaId           String?
