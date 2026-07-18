@@ -28,6 +28,7 @@ type ExistingListing = {
   priceKes: number;
   depositKes: number | null;
   serviceChargeKes: number | null;
+  sizeSqm: number | null;
   areaId: string | null;
   estate: string | null;
   streetAddress: string;
@@ -161,7 +162,7 @@ export function ListingForm({
 
       <section className="space-y-4">
         <h2 className="text-sm font-semibold text-foreground">Pricing & size</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-2">
             <Label htmlFor="priceKes">
               {purpose === "RENT" ? "Rent (KES/month)" : "Price (KES)"}
@@ -175,6 +176,10 @@ export function ListingForm({
           <div className="space-y-2">
             <Label htmlFor="serviceChargeKes">Service charge (KES, optional)</Label>
             <Input id="serviceChargeKes" name="serviceChargeKes" type="number" min={0} defaultValue={listing?.serviceChargeKes ?? ""} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="sizeSqm">Size (sqm, optional)</Label>
+            <Input id="sizeSqm" name="sizeSqm" type="number" min={0} defaultValue={listing?.sizeSqm ?? ""} />
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">

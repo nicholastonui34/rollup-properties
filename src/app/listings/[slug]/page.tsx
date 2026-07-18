@@ -205,6 +205,9 @@ export default async function ListingDetailPage({
             <span><strong className="text-foreground">{listing.bedrooms}</strong> bed</span>
             <span><strong className="text-foreground">{listing.bathrooms}</strong> bath</span>
             <span className="text-foreground">{listing.furnished ? "Furnished" : "Unfurnished"}</span>
+            <span className="text-foreground">
+              Size: {listing.sizeSqm != null ? `${listing.sizeSqm} sqm` : "Not provided"}
+            </span>
           </div>
 
           <div>
@@ -232,16 +235,16 @@ export default async function ListingDetailPage({
               KES {listing.priceKes.toLocaleString()}
               {listing.purpose === "RENT" && <span className="text-sm font-normal text-muted-foreground">/month</span>}
             </p>
-            {listing.depositKes != null && (
-              <p className="mt-1 text-sm text-muted-foreground">
-                Deposit: KES {listing.depositKes.toLocaleString()}
-              </p>
-            )}
-            {listing.serviceChargeKes != null && (
-              <p className="text-sm text-muted-foreground">
-                Service charge: KES {listing.serviceChargeKes.toLocaleString()}/mo
-              </p>
-            )}
+            <p className="mt-1 text-sm text-muted-foreground">
+              Deposit:{" "}
+              {listing.depositKes != null ? `KES ${listing.depositKes.toLocaleString()}` : "Not provided"}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Service charge:{" "}
+              {listing.serviceChargeKes != null
+                ? `KES ${listing.serviceChargeKes.toLocaleString()}/mo`
+                : "Not provided"}
+            </p>
 
             <div className="mt-5 rounded-xl border border-dashed border-border bg-muted/40 p-4 text-center">
               {hasAccess ? (

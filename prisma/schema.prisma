@@ -123,6 +123,7 @@ model Listing {
   priceKes         Int
   depositKes       Int?
   serviceChargeKes Int?
+  sizeSqm          Int?
   county           String
   town             String
   areaId           String?
