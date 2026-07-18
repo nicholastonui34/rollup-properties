@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BedDouble, Bath, MapPin, ShieldCheck, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { PROPERTY_TYPE_LABELS } from "@/lib/listing-options";
+import { PROPERTY_TYPE_LABELS, listingStatusLabel } from "@/lib/listing-options";
 import type { ListingCardData } from "@/lib/search";
 import { toggleFavoriteAction } from "@/app/favorites/actions";
 import { FavoriteButton } from "@/components/listing/favorite-button";
@@ -54,9 +54,12 @@ export function ListingCard({
               </Badge>
             )}
           </div>
-          <Badge variant="secondary" className="absolute right-2 top-2">
-            {listing.purpose === "RENT" ? "To rent" : "For sale"}
-          </Badge>
+          <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+            <Badge variant="secondary">{listing.purpose === "RENT" ? "To rent" : "For sale"}</Badge>
+            {listing.status !== "LIVE" && (
+              <Badge variant="outline">{listingStatusLabel(listing.status, listing.purpose)}</Badge>
+            )}
+          </div>
           <FavoriteButton
             action={toggleFavoriteAction.bind(null, listing.id, path)}
             saved={favorited}

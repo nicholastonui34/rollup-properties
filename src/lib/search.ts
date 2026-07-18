@@ -27,6 +27,7 @@ export interface ParsedFilters {
   propertyType?: PropertyType;
   furnished: boolean;
   amenities: string[];
+  includeTaken: boolean;
   sort: SortKey;
   page: number;
   view: "grid" | "map";
@@ -61,6 +62,7 @@ export function parseFilters(params: RawSearchParams): ParsedFilters {
     propertyType: (first(params.propertyType) as PropertyType) || undefined,
     furnished: first(params.furnished) === "1",
     amenities: list(params.amenities).filter(Boolean),
+    includeTaken: first(params.includeTaken) === "1",
     sort,
     page,
     view,
@@ -68,7 +70,12 @@ export function parseFilters(params: RawSearchParams): ParsedFilters {
 }
 
 export function buildWhere(filters: ParsedFilters): Prisma.ListingWhereInput {
-  const where: Prisma.ListingWhereInput = { status: "LIVE" };
+  // Rented/sold listings are excluded from default results (spec §6) but
+  // stay visible via this explicit opt-in, alongside the always-open
+  // direct-link access on the listing page itself.
+  const where: Prisma.ListingWhereInput = {
+    status: filters.includeTaken ? { in: ["LIVE", "TAKEN"] } : "LIVE",
+  };
 
   if (filters.purpose) where.purpose = filters.purpose;
   if (filters.town) where.town = filters.town;
@@ -129,6 +136,7 @@ export const LISTING_CARD_SELECT = {
   slug: true,
   title: true,
   purpose: true,
+  status: true,
   propertyType: true,
   priceKes: true,
   town: true,

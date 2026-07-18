@@ -21,6 +21,7 @@ export async function AreaLanding({ areaSlug, purpose }: { areaSlug: string; pur
     areaSlug: area.slug,
     furnished: false,
     amenities: [],
+    includeTaken: false,
     sort: "newest",
     page: 1,
     view: "grid",

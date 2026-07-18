@@ -165,6 +165,17 @@ export async function SearchFilters({ filters }: { filters: ParsedFilters }) {
         Furnished only
       </label>
 
+      <label className="flex items-center gap-2 text-sm text-foreground">
+        <input
+          type="checkbox"
+          name="includeTaken"
+          value="1"
+          defaultChecked={filters.includeTaken}
+          className="size-4 rounded border-input"
+        />
+        Include rented/sold listings
+      </label>
+
       <fieldset>
         <legend className={labelClass}>Amenities</legend>
         <div className="grid grid-cols-1 gap-1.5">
