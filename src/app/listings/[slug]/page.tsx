@@ -168,25 +168,50 @@ export default async function ListingDetailPage({
       )}
 
       {listing.images.length > 0 ? (
-        <div className="grid grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl">
-          <div className="relative col-span-4 row-span-2 aspect-video sm:col-span-2 sm:row-span-2">
-            {cover && (
-              <Image
-                src={cover.url}
-                alt={listing.title}
-                fill
-                sizes="600px"
-                className="object-cover"
-                priority={!listing.tourEmbedUrl && !listing.videoUrl}
-              />
+        <>
+          {/* Mobile: swipeable carousel showing every photo (CSS scroll-snap, no JS). */}
+          <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto rounded-2xl sm:hidden">
+            {[cover, ...gallery].map((img, idx) =>
+              img ? (
+                <div
+                  key={img.id}
+                  className="relative aspect-video w-full flex-none snap-center overflow-hidden rounded-2xl"
+                >
+                  <Image
+                    src={img.url}
+                    alt={idx === 0 ? listing.title : ""}
+                    fill
+                    sizes="100vw"
+                    className="object-cover"
+                    priority={idx === 0 && !listing.tourEmbedUrl && !listing.videoUrl}
+                    loading={idx === 0 ? undefined : "lazy"}
+                  />
+                </div>
+              ) : null
             )}
           </div>
-          {gallery.slice(0, 4).map((img) => (
-            <div key={img.id} className="relative col-span-2 row-span-1 hidden aspect-square sm:block">
-              <Image src={img.url} alt="" fill sizes="300px" className="object-cover" />
+
+          {/* Tablet/desktop: hero + grid of 4. */}
+          <div className="hidden grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl sm:grid">
+            <div className="relative col-span-2 row-span-2 aspect-video">
+              {cover && (
+                <Image
+                  src={cover.url}
+                  alt={listing.title}
+                  fill
+                  sizes="600px"
+                  className="object-cover"
+                  priority={!listing.tourEmbedUrl && !listing.videoUrl}
+                />
+              )}
             </div>
-          ))}
-        </div>
+            {gallery.slice(0, 4).map((img) => (
+              <div key={img.id} className="relative col-span-2 row-span-1 aspect-square">
+                <Image src={img.url} alt="" fill sizes="300px" className="object-cover" loading="lazy" />
+              </div>
+            ))}
+          </div>
+        </>
       ) : !listing.tourEmbedUrl && !listing.videoUrl ? (
         <div className="flex aspect-video items-center justify-center rounded-2xl bg-muted text-sm text-muted-foreground">
           No photos yet
