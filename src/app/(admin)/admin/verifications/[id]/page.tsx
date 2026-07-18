@@ -1,11 +1,14 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { VerificationReviewPanel } from "@/components/admin/verification-review-panel";
+import { FeatureListingButton } from "@/components/admin/feature-listing-button";
 import { PROPERTY_TYPE_LABELS, LISTING_STATUS_BADGE_VARIANT, listingStatusLabel } from "@/lib/listing-options";
 import { displayPhone } from "@/lib/phone";
+import { isPast } from "@/lib/dates";
 
 export const metadata: Metadata = { title: "Review listing" };
 
@@ -35,7 +38,10 @@ export default async function AdminVerificationDetailPage({
 
   if (!listing) notFound();
 
+  const session = await auth();
+  const isAdmin = session?.user.role === "ADMIN";
   const canReview = ["SUBMITTED", "IN_VERIFICATION", "NEEDS_INFO"].includes(listing.status);
+  const isFeatured = Boolean(listing.featuredUntil && !isPast(listing.featuredUntil));
 
   return (
     <div className="space-y-6">
@@ -149,6 +155,28 @@ export default async function AdminVerificationDetailPage({
               )}
             </div>
           </div>
+
+          {isAdmin && (
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <h2 className="text-sm font-semibold text-foreground">Featured placement</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Boosts this listing to the top of search results.
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {isFeatured && (
+                  <Badge>
+                    Featured until{" "}
+                    {listing.featuredUntil!.toLocaleDateString("en-KE", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </Badge>
+                )}
+                <FeatureListingButton listingId={listing.id} featured={isFeatured} />
+              </div>
+            </div>
+          )}
 
           {canReview && <VerificationReviewPanel listingId={listing.id} status={listing.status} />}
         </div>

@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BedDouble, Bath, MapPin, ShieldCheck } from "lucide-react";
+import { BedDouble, Bath, MapPin, ShieldCheck, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PROPERTY_TYPE_LABELS } from "@/lib/listing-options";
 import type { ListingCardData } from "@/lib/search";
 import { toggleFavoriteAction } from "@/app/favorites/actions";
 import { FavoriteButton } from "@/components/listing/favorite-button";
+import { isPast } from "@/lib/dates";
 
 export function ListingCard({
   listing,
@@ -20,6 +21,7 @@ export function ListingCard({
   const cover = listing.images[0]?.url;
   const location = listing.area?.name ?? listing.estate ?? listing.town;
   const isVerified = Boolean(listing.verifiedAt);
+  const isFeatured = Boolean(listing.featuredUntil && !isPast(listing.featuredUntil));
 
   return (
     <Card className="overflow-hidden py-0 transition-shadow hover:shadow-md">
@@ -38,12 +40,20 @@ export function ListingCard({
               No photo
             </div>
           )}
-          {isVerified && (
-            <Badge className="absolute left-2 top-2 gap-1 bg-gold text-gold-foreground hover:bg-gold">
-              <ShieldCheck className="size-3" />
-              Verified
-            </Badge>
-          )}
+          <div className="absolute left-2 top-2 flex flex-col items-start gap-1">
+            {isVerified && (
+              <Badge className="gap-1 bg-gold text-gold-foreground hover:bg-gold">
+                <ShieldCheck className="size-3" />
+                Verified
+              </Badge>
+            )}
+            {isFeatured && (
+              <Badge className="gap-1" variant="default">
+                <Sparkles className="size-3" />
+                Featured
+              </Badge>
+            )}
+          </div>
           <Badge variant="secondary" className="absolute right-2 top-2">
             {listing.purpose === "RENT" ? "To rent" : "For sale"}
           </Badge>

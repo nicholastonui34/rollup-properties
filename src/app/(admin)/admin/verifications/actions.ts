@@ -3,7 +3,9 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireVerifier } from "@/lib/auth-guards";
+import { requireVerifier, requireAdmin } from "@/lib/auth-guards";
+
+const FEATURE_DURATION_DAYS = 30;
 
 const evidenceSchema = z.array(z.object({ url: z.string().url(), publicId: z.string().min(1) }));
 
@@ -91,4 +93,23 @@ export async function needsInfoListingAction(
 ) {
   const notes = parseReason(payload.notes);
   await recordDecision(listingId, "NEEDS_INFO", notes, payload.evidence);
+}
+
+// Manual admin toggle only — no payment rail wired to this yet (spec §8
+// explicitly says not to add one without confirmation).
+export async function setFeaturedAction(listingId: string) {
+  await requireAdmin();
+  await prisma.listing.update({
+    where: { id: listingId },
+    data: { featuredUntil: new Date(Date.now() + FEATURE_DURATION_DAYS * 24 * 60 * 60 * 1000) },
+  });
+  revalidatePath(`/admin/verifications/${listingId}`);
+  revalidatePath("/search");
+}
+
+export async function unfeatureAction(listingId: string) {
+  await requireAdmin();
+  await prisma.listing.update({ where: { id: listingId }, data: { featuredUntil: null } });
+  revalidatePath(`/admin/verifications/${listingId}`);
+  revalidatePath("/search");
 }

@@ -76,6 +76,14 @@ enum ReportStatus {
   ACTIONED
 }
 
+// Schema-only for now (spec §8): no billing/enforcement wired up, just the
+// data model so a real subscription rail can be added later without another
+// migration. FREE is the only tier actually in effect.
+enum PlanTier {
+  FREE
+  PRO
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String
@@ -87,6 +95,7 @@ model User {
   idVerifiedAt  DateTime?
   bannedAt      DateTime?
   banReason     String?
+  planTier      PlanTier  @default(FREE)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -142,6 +151,7 @@ model Listing {
   verifiedAt       DateTime?
   verifiedById     String?
   expiresAt        DateTime?
+  featuredUntil    DateTime?
   viewCount        Int            @default(0)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt

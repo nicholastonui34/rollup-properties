@@ -103,16 +103,24 @@ export function buildWhere(filters: ParsedFilters): Prisma.ListingWhereInput {
   return where;
 }
 
+// Featured listings lead every sort mode. featuredUntil isn't re-checked
+// against "now" here (Prisma orderBy can't express that), so an expired
+// feature keeps sorting first until an admin clears or renews it — an
+// accepted simplification for this schema/UI scaffold (see AUDIT.md).
+const FEATURED_FIRST: Prisma.ListingOrderByWithRelationInput = {
+  featuredUntil: { sort: "desc", nulls: "last" },
+};
+
 function orderBy(sort: SortKey): Prisma.ListingOrderByWithRelationInput[] {
   switch (sort) {
     case "price_asc":
-      return [{ priceKes: "asc" }];
+      return [FEATURED_FIRST, { priceKes: "asc" }];
     case "price_desc":
-      return [{ priceKes: "desc" }];
+      return [FEATURED_FIRST, { priceKes: "desc" }];
     case "verified":
-      return [{ verifiedAt: "desc" }, { createdAt: "desc" }];
+      return [FEATURED_FIRST, { verifiedAt: "desc" }, { createdAt: "desc" }];
     default:
-      return [{ createdAt: "desc" }];
+      return [FEATURED_FIRST, { createdAt: "desc" }];
   }
 }
 
@@ -130,6 +138,7 @@ export const LISTING_CARD_SELECT = {
   lat: true,
   lng: true,
   verifiedAt: true,
+  featuredUntil: true,
   area: { select: { name: true, town: true } },
   images: { where: { isCover: true }, take: 1, select: { url: true } },
 } satisfies Prisma.ListingSelect;
