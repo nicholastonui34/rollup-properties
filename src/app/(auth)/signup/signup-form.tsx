@@ -58,7 +58,7 @@ export function SignupForm({ defaultRole }: { defaultRole: "SEEKER" | "LISTER" }
         <Input id="name" name="name" autoComplete="name" placeholder="Jane Wanjiku" required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="phone">Phone number (M-Pesa)</Label>
+        <Label htmlFor="phone">Phone number{role === "SEEKER" ? " (M-Pesa)" : ""}</Label>
         <Input
           id="phone"
           name="phone"
