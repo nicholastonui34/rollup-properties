@@ -5,8 +5,18 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PROPERTY_TYPE_LABELS } from "@/lib/listing-options";
 import type { ListingCardData } from "@/lib/search";
+import { toggleFavoriteAction } from "@/app/favorites/actions";
+import { FavoriteButton } from "@/components/listing/favorite-button";
 
-export function ListingCard({ listing }: { listing: ListingCardData }) {
+export function ListingCard({
+  listing,
+  favorited = false,
+  path = "/search",
+}: {
+  listing: ListingCardData;
+  favorited?: boolean;
+  path?: string;
+}) {
   const cover = listing.images[0]?.url;
   const location = listing.area?.name ?? listing.estate ?? listing.town;
   const isVerified = Boolean(listing.verifiedAt);
@@ -37,6 +47,12 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
           <Badge variant="secondary" className="absolute right-2 top-2">
             {listing.purpose === "RENT" ? "To rent" : "For sale"}
           </Badge>
+          <FavoriteButton
+            action={toggleFavoriteAction.bind(null, listing.id, path)}
+            saved={favorited}
+            variant="overlay"
+            className="absolute bottom-2 right-2"
+          />
         </div>
 
         <div className="space-y-1.5 p-4">

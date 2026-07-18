@@ -24,6 +24,9 @@ export default async function AdminLayout({
         <Button asChild variant="ghost" size="sm">
           <Link href="/admin/payments">Payments</Link>
         </Button>
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/admin/reports">Reports</Link>
+        </Button>
       </nav>
       {children}
     </div>

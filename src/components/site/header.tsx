@@ -2,10 +2,16 @@ import Link from "next/link";
 import { auth, signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/site/logo";
+import { MobileNav } from "@/components/site/mobile-nav";
 
 export async function SiteHeader() {
   const session = await auth();
   const firstName = session?.user?.name?.split(" ")[0];
+
+  async function signOutAction() {
+    "use server";
+    await signOut({ redirectTo: "/" });
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur">
@@ -51,12 +57,7 @@ export async function SiteHeader() {
               <span className="hidden text-sm text-muted-foreground sm:inline">
                 Hi, <span className="font-medium text-foreground">{firstName}</span>
               </span>
-              <form
-                action={async () => {
-                  "use server";
-                  await signOut({ redirectTo: "/" });
-                }}
-              >
+              <form action={signOutAction} className="hidden sm:block">
                 <Button variant="outline" size="lg" type="submit">
                   Sign out
                 </Button>
@@ -64,14 +65,19 @@ export async function SiteHeader() {
             </>
           ) : (
             <>
-              <Button asChild variant="ghost" size="lg">
+              <Button asChild variant="ghost" size="lg" className="hidden sm:inline-flex">
                 <Link href="/login">Log in</Link>
               </Button>
-              <Button asChild size="lg">
+              <Button asChild size="lg" className="hidden sm:inline-flex">
                 <Link href="/signup?role=LISTER">List your property</Link>
               </Button>
             </>
           )}
+
+          <MobileNav
+            session={session?.user ? { firstName: firstName ?? "", role: session.user.role } : null}
+            signOutAction={signOutAction}
+          />
         </div>
       </div>
     </header>

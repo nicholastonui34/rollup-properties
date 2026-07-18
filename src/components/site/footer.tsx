@@ -67,9 +67,20 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-border/70 py-4">
-        <p className="mx-auto max-w-6xl px-4 text-xs text-muted-foreground sm:px-6">
-          © {new Date().getFullYear()} Rollup Properties · Nairobi, Kenya
-        </p>
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 text-xs text-muted-foreground sm:px-6">
+          <p>© {new Date().getFullYear()} Rollup Properties · Nairobi, Kenya</p>
+          <nav className="flex flex-wrap gap-x-4 gap-y-1" aria-label="Legal">
+            <Link href="/terms" className="transition-colors hover:text-foreground">
+              Terms
+            </Link>
+            <Link href="/privacy" className="transition-colors hover:text-foreground">
+              Privacy
+            </Link>
+            <Link href="/refund-policy" className="transition-colors hover:text-foreground">
+              Refund Policy
+            </Link>
+          </nav>
+        </div>
       </div>
     </footer>
   );

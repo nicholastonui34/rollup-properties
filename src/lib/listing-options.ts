@@ -1,4 +1,4 @@
-import type { ListingStatus, PropertyType } from "@prisma/client";
+import type { ListingStatus, PropertyType, ReportStatus } from "@prisma/client";
 
 export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
   BEDSITTER: "Bedsitter",
@@ -55,4 +55,34 @@ export const LISTING_STATUS_BADGE_VARIANT: Record<
   TAKEN: "outline",
   EXPIRED: "outline",
   SUSPENDED: "destructive",
+};
+
+export const REPORT_REASONS = [
+  "Listing looks fake or is a scam",
+  "Photos don't match the property",
+  "Already rented / sold",
+  "Wrong price or location",
+  "Manager unreachable after unlock",
+  "Other",
+] as const;
+
+// A listing gets pulled from public view automatically once this many
+// open reports pile up — protects seekers while a human reviews it.
+export const REPORT_AUTO_SUSPEND_THRESHOLD = 3;
+
+export const REPORT_STATUS_LABELS: Record<ReportStatus, string> = {
+  OPEN: "Open",
+  REVIEWED: "Reviewed",
+  DISMISSED: "Dismissed",
+  ACTIONED: "Actioned",
+};
+
+export const REPORT_STATUS_BADGE_VARIANT: Record<
+  ReportStatus,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
+  OPEN: "destructive",
+  REVIEWED: "secondary",
+  DISMISSED: "outline",
+  ACTIONED: "default",
 };

@@ -222,13 +222,14 @@ model SavedListing {
 }
 
 model SavedSearch {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   name          String
   filtersJson   Json
-  alertsEnabled Boolean  @default(false)
-  createdAt     DateTime @default(now())
+  alertsEnabled Boolean   @default(false)
+  lastAlertedAt DateTime?
+  createdAt     DateTime  @default(now())
 }
 
 model Report {

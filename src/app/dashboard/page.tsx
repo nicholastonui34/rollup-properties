@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Bell } from "lucide-react";
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -33,7 +34,7 @@ export default async function DashboardPage() {
       where: { listerId: session!.user.id },
       include: {
         images: { where: { isCover: true }, take: 1 },
-        _count: { select: { images: true } },
+        _count: { select: { images: true, unlocks: true } },
         verifications: { orderBy: { createdAt: "desc" }, take: 1 },
       },
       orderBy: { updatedAt: "desc" },
@@ -122,6 +123,16 @@ export default async function DashboardPage() {
                         {listing.verifications[0].notes}
                       </p>
                     )}
+                  {listing._count.unlocks > 0 && (
+                    <Link
+                      href={`/dashboard/listings/${listing.id}/leads`}
+                      className="mt-2 flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                    >
+                      <Bell className="size-3.5" />
+                      {listing._count.unlocks} {listing._count.unlocks === 1 ? "person has" : "people have"} unlocked
+                      your contact
+                    </Link>
+                  )}
 
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Button asChild size="sm" variant="outline">

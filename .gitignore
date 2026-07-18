@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# seed script manifests (local record of generated test-data IDs, not real data)
+scripts/*-manifest.json

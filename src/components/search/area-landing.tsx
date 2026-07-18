@@ -4,6 +4,7 @@ import type { ListingPurpose } from "@prisma/client";
 import { ListingCard } from "@/components/listings/listing-card";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 import { PAGE_SIZE, searchListings, type ParsedFilters } from "@/lib/search";
 
 export async function getAreaOrNotFound(slug: string) {
@@ -25,7 +26,17 @@ export async function AreaLanding({ areaSlug, purpose }: { areaSlug: string; pur
     view: "grid",
   };
 
-  const { listings, total } = await searchListings(filters);
+  const [{ listings, total }, session] = await Promise.all([searchListings(filters), auth()]);
+  const favoritedIds = session?.user
+    ? new Set(
+        (
+          await prisma.savedListing.findMany({
+            where: { userId: session.user.id, listingId: { in: listings.map((l) => l.id) } },
+            select: { listingId: true },
+          })
+        ).map((s) => s.listingId)
+      )
+    : new Set<string>();
   const verb = purpose === "RENT" ? "to rent" : "for sale";
 
   return (
@@ -54,7 +65,12 @@ export async function AreaLanding({ areaSlug, purpose }: { areaSlug: string; pur
         <>
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {listings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
+              <ListingCard
+                key={listing.id}
+                listing={listing}
+                favorited={favoritedIds.has(listing.id)}
+                path={`/${purpose === "RENT" ? "rent" : "sale"}/${areaSlug}`}
+              />
             ))}
           </div>
           {total > PAGE_SIZE && (

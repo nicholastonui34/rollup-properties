@@ -8,8 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PROPERTY_TYPE_LABELS, UNLOCK_PRICE_KES } from "@/lib/listing-options";
 import { displayPhone } from "@/lib/phone";
+import { SITE_URL } from "@/lib/site";
 import { initiateUnlockAction } from "./unlock-actions";
 import { UnlockButton } from "@/components/listing/unlock-button";
+import { FavoriteButton } from "@/components/listing/favorite-button";
+import { ReportButton } from "@/components/listing/report-button";
+import { toggleFavoriteAction } from "@/app/favorites/actions";
+import { reportListingAction } from "./report-actions";
 
 export async function generateMetadata({
   params,
@@ -19,7 +24,14 @@ export async function generateMetadata({
   const { slug } = await params;
   const listing = await prisma.listing.findUnique({ where: { slug }, select: { title: true, description: true } });
   if (!listing) return {};
-  return { title: listing.title, description: listing.description.slice(0, 155) };
+  const description = listing.description.slice(0, 155);
+  return {
+    title: listing.title,
+    description,
+    alternates: { canonical: `/listings/${slug}` },
+    openGraph: { title: listing.title, description, url: `${SITE_URL}/listings/${slug}` },
+    twitter: { title: listing.title, description },
+  };
 }
 
 export default async function ListingDetailPage({
@@ -27,10 +39,10 @@ export default async function ListingDetailPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ unlocked?: string; unlock_failed?: string }>;
+  searchParams: Promise<{ unlocked?: string; unlock_failed?: string; reported?: string }>;
 }) {
   const { slug } = await params;
-  const { unlocked, unlock_failed } = await searchParams;
+  const { unlocked, unlock_failed, reported } = await searchParams;
   const session = await auth();
 
   const listing = await prisma.listing.findUnique({
@@ -56,12 +68,59 @@ export default async function ListingDetailPage({
       : null;
   const hasAccess = isOwner || isAdmin || Boolean(unlock);
 
+  const favorite =
+    session?.user && !isOwner
+      ? await prisma.savedListing.findUnique({
+          where: { userId_listingId: { userId: session.user.id, listingId: listing.id } },
+        })
+      : null;
+
   const cover = listing.images.find((i) => i.isCover) ?? listing.images[0];
   const gallery = listing.images.filter((i) => i.id !== cover?.id);
   const isVerified = Boolean(listing.verifiedAt);
 
+  const jsonLd =
+    listing.status === "LIVE"
+      ? {
+          "@context": "https://schema.org",
+          "@type": "RealEstateListing",
+          "@id": `${SITE_URL}/listings/${listing.slug}`,
+          url: `${SITE_URL}/listings/${listing.slug}`,
+          name: listing.title,
+          description: listing.description,
+          datePosted: listing.verifiedAt?.toISOString() ?? listing.createdAt.toISOString(),
+          image: listing.images.map((i) => i.url),
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: listing.streetAddress,
+            addressLocality: listing.estate ?? listing.area?.name ?? listing.town,
+            addressRegion: listing.town,
+            addressCountry: "KE",
+          },
+          ...(listing.lat != null && listing.lng != null
+            ? { geo: { "@type": "GeoCoordinates", latitude: listing.lat, longitude: listing.lng } }
+            : {}),
+          numberOfRooms: listing.bedrooms,
+          numberOfBathroomsTotal: listing.bathrooms,
+          offers: {
+            "@type": "Offer",
+            price: listing.priceKes,
+            priceCurrency: "KES",
+            availability: "https://schema.org/InStock",
+            businessFunction:
+              listing.purpose === "RENT" ? "http://purl.org/goodrelations/v1#LeaseOut" : "http://purl.org/goodrelations/v1#Sell",
+          },
+        }
+      : null;
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       {listing.status !== "LIVE" && (
         <div className="mb-6 rounded-lg bg-secondary px-4 py-2 text-sm text-secondary-foreground">
           Preview only — this listing is <strong>{listing.status.replace("_", " ").toLowerCase()}</strong> and
@@ -76,6 +135,11 @@ export default async function ListingDetailPage({
       {unlock_failed === "1" && (
         <div className="mb-6 rounded-lg bg-destructive/10 px-4 py-2 text-sm text-destructive">
           Payment didn&apos;t go through, so you haven&apos;t been charged. Try again below.
+        </div>
+      )}
+      {reported === "1" && (
+        <div className="mb-6 rounded-lg bg-secondary px-4 py-2 text-sm text-secondary-foreground">
+          Thanks — we&apos;ve flagged this listing for review.
         </div>
       )}
 
@@ -99,15 +163,23 @@ export default async function ListingDetailPage({
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              {isVerified ? (
-                <Badge>
-                  Verified {listing.verifiedAt!.toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
-                </Badge>
-              ) : (
-                <Badge variant="outline">Not yet verified</Badge>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {isVerified ? (
+                  <Badge>
+                    Verified {listing.verifiedAt!.toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline">Not yet verified</Badge>
+                )}
+                <Badge variant="secondary">{PROPERTY_TYPE_LABELS[listing.propertyType]}</Badge>
+              </div>
+              {!isOwner && (
+                <FavoriteButton
+                  action={toggleFavoriteAction.bind(null, listing.id, `/listings/${listing.slug}`)}
+                  saved={Boolean(favorite)}
+                />
               )}
-              <Badge variant="secondary">{PROPERTY_TYPE_LABELS[listing.propertyType]}</Badge>
             </div>
             <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
               {listing.title}
@@ -209,6 +281,15 @@ export default async function ListingDetailPage({
             <Button asChild variant="outline" className="w-full">
               <Link href={`/dashboard/listings/${listing.id}/edit`}>Edit listing</Link>
             </Button>
+          )}
+
+          {!isOwner && !isAdmin && listing.status === "LIVE" && (
+            <div className="text-center">
+              <ReportButton
+                action={reportListingAction.bind(null, listing.id)}
+                loggedIn={Boolean(session?.user)}
+              />
+            </div>
           )}
         </div>
       </div>

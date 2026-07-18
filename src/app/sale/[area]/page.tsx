@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AreaLanding, getAreaOrNotFound } from "@/components/search/area-landing";
+import { SITE_URL } from "@/lib/site";
 
 export async function generateMetadata({
   params,
@@ -8,9 +9,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { area: slug } = await params;
   const area = await getAreaOrNotFound(slug);
+  const title = `Homes for sale in ${area.name}, ${area.town}`;
+  const description = `Verified homes for sale in ${area.name}, ${area.town}. Real photos, real addresses, honest pricing.`;
   return {
-    title: `Homes for sale in ${area.name}, ${area.town}`,
-    description: `Verified homes for sale in ${area.name}, ${area.town}. Real photos, real addresses, honest pricing.`,
+    title,
+    description,
+    alternates: { canonical: `/sale/${slug}` },
+    openGraph: { title, description, url: `${SITE_URL}/sale/${slug}` },
+    twitter: { title, description },
   };
 }
 
