@@ -10,7 +10,7 @@ import { ImageUploader } from "@/components/listing/image-uploader";
 import { updateListingAction, submitListingAction } from "@/app/dashboard/listings/actions";
 import {
   LISTING_STATUS_BADGE_VARIANT,
-  LISTING_STATUS_LABELS,
+  listingStatusLabel,
   MIN_LISTING_PHOTOS,
 } from "@/lib/listing-options";
 
@@ -55,7 +55,7 @@ export default async function EditListingPage({
             {listing.title}
           </h1>
           <Badge variant={LISTING_STATUS_BADGE_VARIANT[listing.status]}>
-            {LISTING_STATUS_LABELS[listing.status]}
+            {listingStatusLabel(listing.status, listing.purpose)}
           </Badge>
         </div>
       </div>

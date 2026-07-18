@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PROPERTY_TYPE_LABELS, UNLOCK_PRICE_KES } from "@/lib/listing-options";
+import { PROPERTY_TYPE_LABELS, UNLOCK_PRICE_KES, listingStatusLabel } from "@/lib/listing-options";
 import { displayPhone } from "@/lib/phone";
 import { SITE_URL } from "@/lib/site";
 import { initiateUnlockAction } from "./unlock-actions";
@@ -58,7 +58,11 @@ export default async function ListingDetailPage({
 
   const isOwner = session?.user?.id === listing.listerId;
   const isAdmin = session?.user?.role === "ADMIN";
-  if (listing.status !== "LIVE" && !isOwner && !isAdmin) notFound();
+  // TAKEN/EXPIRED listings stay reachable via direct link for anyone (spec
+  // §6) — only pre-publication/actioned states (draft, in review, rejected,
+  // suspended) are hidden from the public entirely.
+  const publiclyViewableWhenNotLive = listing.status === "TAKEN" || listing.status === "EXPIRED";
+  if (listing.status !== "LIVE" && !publiclyViewableWhenNotLive && !isOwner && !isAdmin) notFound();
 
   const unlock =
     session?.user && !isOwner && !isAdmin
@@ -121,7 +125,13 @@ export default async function ListingDetailPage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      {listing.status !== "LIVE" && (
+      {listing.status !== "LIVE" && publiclyViewableWhenNotLive && (
+        <div className="mb-6 rounded-lg bg-secondary px-4 py-2 text-sm text-secondary-foreground">
+          This listing is no longer available —{" "}
+          <strong>{listingStatusLabel(listing.status, listing.purpose).toLowerCase()}</strong>.
+        </div>
+      )}
+      {listing.status !== "LIVE" && !publiclyViewableWhenNotLive && (
         <div className="mb-6 rounded-lg bg-secondary px-4 py-2 text-sm text-secondary-foreground">
           Preview only — this listing is <strong>{listing.status.replace("_", " ").toLowerCase()}</strong> and
           isn&apos;t publicly visible yet.
@@ -250,6 +260,13 @@ export default async function ListingDetailPage({
                       View receipt
                     </Link>
                   )}
+                </>
+              ) : listing.status !== "LIVE" ? (
+                <>
+                  <p className="text-sm font-medium text-foreground">Contact unavailable</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    This listing is no longer accepting new contact unlocks.
+                  </p>
                 </>
               ) : session?.user ? (
                 <>

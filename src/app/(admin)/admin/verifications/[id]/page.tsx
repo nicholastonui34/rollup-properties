@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { VerificationReviewPanel } from "@/components/admin/verification-review-panel";
-import { PROPERTY_TYPE_LABELS, LISTING_STATUS_BADGE_VARIANT, LISTING_STATUS_LABELS } from "@/lib/listing-options";
+import { PROPERTY_TYPE_LABELS, LISTING_STATUS_BADGE_VARIANT, listingStatusLabel } from "@/lib/listing-options";
 import { displayPhone } from "@/lib/phone";
 
 export const metadata: Metadata = { title: "Review listing" };
@@ -41,7 +41,7 @@ export default async function AdminVerificationDetailPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={LISTING_STATUS_BADGE_VARIANT[listing.status]}>
-          {LISTING_STATUS_LABELS[listing.status]}
+          {listingStatusLabel(listing.status, listing.purpose)}
         </Badge>
         <Badge variant="secondary">{PROPERTY_TYPE_LABELS[listing.propertyType]}</Badge>
       </div>

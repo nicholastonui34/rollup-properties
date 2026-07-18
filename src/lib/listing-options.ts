@@ -1,4 +1,4 @@
-import type { ListingStatus, PropertyType, ReportStatus } from "@prisma/client";
+import type { ListingPurpose, ListingStatus, PropertyType, ReportStatus } from "@prisma/client";
 
 export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
   BEDSITTER: "Bedsitter",
@@ -41,6 +41,14 @@ export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
   EXPIRED: "Expired",
   SUSPENDED: "Suspended",
 };
+
+// TAKEN covers both "rented" and "sold" — the label is purpose-aware so a
+// tenant listing reads "Rented" and a sale listing reads "Sold" everywhere
+// the status is shown, without splitting the DB enum in two.
+export function listingStatusLabel(status: ListingStatus, purpose: ListingPurpose): string {
+  if (status === "TAKEN") return purpose === "SALE" ? "Sold" : "Rented";
+  return LISTING_STATUS_LABELS[status];
+}
 
 export const LISTING_STATUS_BADGE_VARIANT: Record<
   ListingStatus,

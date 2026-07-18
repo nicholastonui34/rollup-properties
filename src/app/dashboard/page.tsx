@@ -16,7 +16,7 @@ import {
 } from "@/app/dashboard/listings/actions";
 import {
   LISTING_STATUS_BADGE_VARIANT,
-  LISTING_STATUS_LABELS,
+  listingStatusLabel,
   MIN_LISTING_PHOTOS,
 } from "@/lib/listing-options";
 import { isPast } from "@/lib/dates";
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
                     className="absolute left-2 top-2"
                     variant={LISTING_STATUS_BADGE_VARIANT[listing.status]}
                   >
-                    {LISTING_STATUS_LABELS[listing.status]}
+                    {listingStatusLabel(listing.status, listing.purpose)}
                   </Badge>
                 </div>
                 <div className="p-4">
@@ -167,9 +167,9 @@ export default async function DashboardPage() {
                           type="submit"
                           size="sm"
                           variant="outline"
-                          confirmMessage="Mark this listing as taken/unpublished?"
+                          confirmMessage={`Mark this listing as ${listing.purpose === "SALE" ? "sold" : "rented"}? It'll come off search but stay viewable via direct link.`}
                         >
-                          Mark as taken
+                          Mark as {listing.purpose === "SALE" ? "sold" : "rented"}
                         </ConfirmSubmitButton>
                       </form>
                     )}
