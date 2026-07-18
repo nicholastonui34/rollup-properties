@@ -132,3 +132,40 @@ Closes rows: **2a** (badge explanation), **2d** (60-day re-verification flag), *
 ## Overall read
 
 The codebase is materially more complete and more disciplined than a typical MVP scaffold — server-side authorization is applied consistently and per-mutation (not just at the UI layer), the verification state machine matches the brief closely, the Paystack unlock flow has a correctly-designed idempotent webhook-as-source-of-truth pattern, and the map/search stack is genuinely wired up (Leaflet+OSM, not a stub). The gaps that matter are concentrated exactly where the spec's "trust" framing is strongest: the homepage and refund-policy pages make an explicit, specific promise ("we refund you and ban the lister") that only half exists in code — refunds are ledger-tracked but there is no ban mechanism at all. Combined with the complete absence of rate limiting on public POST endpoints (unlock-initiate, report, login), these are the two P0 items. The tour/video media hierarchy the spec treats as primary is entirely absent from the schema, which is the single largest scoped gap (P1, Milestone F4) but is architecturally straightforward to add given the existing nullable-field, iframe-embed-friendly style of the rest of the model.
+
+---
+
+## Compliance Summary (post-remediation)
+
+All six milestones (F1–F6) were implemented, each verified with `tsc --noEmit`, `npm run lint`, `npm run build`, and a manual browser/DB-level check, then committed separately. Two rows from the original gap table turned out to be false negatives from the audit pass — corrected below rather than re-implemented.
+
+| Spec § | Requirement | Final status | Evidence |
+|---|---|---|---|
+| 1a/1b | 3D tour + video, ranked above photos | ✅ Implemented | `Listing.tourEmbedUrl`/`videoUrl` (F4); `listings/[slug]/page.tsx` renders the tour/video iframe before the photo grid; form fields + host-allowlist/embed-URL validation in `src/lib/media-embed.ts` |
+| 1c | Mobile media performance | ✅ Implemented (photos); embed-only (tour/video) | Cloudinary handles photo compression/adaptive delivery via `next/image`; tours/videos are third-party iframes (no self-hosted asset to optimize, and no CDN weight added to the app) |
+| 2a | Verified badge + explanation + date | ✅ Implemented | `listings/[slug]/page.tsx`: badge `title` tooltip + always-visible explainer sentence (F6) |
+| 2b/2c | Draft→pending→verified/rejected state machine, stamped | ✅ Implemented | Pre-existing; unchanged |
+| 2d | 60-day re-verification flag | ✅ Implemented | Pre-existing (`admin/verifications/page.tsx` "Flagged for re-verification" section, predates this session) — the original audit's "❌ Missing" call on this row was incorrect; corrected here, no code change needed |
+| 3a/3b/3c | Direct contact flow, refund path, no broker layer | ✅ Implemented | Unchanged; audited end-to-end in Phase 1 |
+| 3d | Rate-limit + validate contact/unlock endpoints | ✅ Implemented | `src/lib/rate-limit.ts` (in-memory, per-instance) wired into `initiateUnlockAction`, `reportListingAction`, and login `authorize()` (F1) |
+| 4a | Price/terms/dimensions, "Not provided" not silent omission | ✅ Implemented | `Listing.sizeSqm` added; deposit/service-charge/size always render a value or literal "Not provided" (F3) |
+| 5a | Granular filters incl. lifecycle status | ✅ Implemented | `includeTaken` search filter (F6), on top of pre-existing region/area/price/type/purpose filters |
+| 5b | Map integration | ✅ Implemented | Pre-existing Leaflet + OpenStreetMap, confirmed wired (not a stub) |
+| 5c | Debounced inputs, server-side filtering, shareable URLs | ✅ Implemented (no debounce needed) | Filter form is explicit-submit ("Apply filters" button), not live-as-you-type — there's no keystroke-triggered request to debounce. Server-side filtering and shareable URL params confirmed pre-existing |
+| 6a/6b | Lister marks Rented/Sold; purpose-aware label | ✅ Implemented | `listingStatusLabel()` helper renders TAKEN as "Rented"/"Sold" by purpose everywhere it's shown (F2) |
+| 6c | Rented/Sold excluded from default search, viewable via direct link or filter | ✅ Implemented | Direct-link 404 fix on `listings/[slug]/page.tsx` (F2) + explicit `includeTaken` search filter (F6) |
+| 7a/7b | Manager dashboard; server-side per-mutation authorization | ✅ Implemented | Pre-existing, audited and confirmed correct; media/tour fields added to the same dashboard form (F4) |
+| 8a | Transaction-based revenue (unlock fee) | ✅ Implemented | Pre-existing |
+| 8b/8c | Subscription tiers + featured placement, schema/UI only | ✅ Implemented | `Listing.featuredUntil` + admin toggle + search sort boost + "Featured" badge (F5); `User.planTier` (FREE/PRO) added schema-only, no billing, per spec's explicit instruction not to add a new payment rail |
+| 9a | Global reach, KES pricing, no geo-block | ⚠️ Flagged, no code change | Paystack's hosted checkout should accept foreign-issued cards, but this wasn't tested against live Paystack settings — flagged for the user to confirm before assuming it works for non-Kenyan users |
+| 9b | Edge/CDN-friendly rendering | ⚠️ Flagged, no code change | No blocking issue found; not exhaustively audited for cacheability |
+| 10a/10b/10c | Auth + server-side authorization + input validation | ✅ Implemented | Pre-existing, confirmed via spot-check in Phase 1 |
+| 10d | Refund + ban flow must exist in code | ✅ Implemented | `User.bannedAt`/`banReason`, admin ban/unban actions, login blocked for banned users, cascading suspension of their other listings (F1) — now matches the homepage/refund-policy promise |
+| 10e | Rate limiting on public POST endpoints | ✅ Implemented | Same as 3d |
+| Eng. | ESLint clean / production build passing | ✅ Verified | Confirmed clean after every milestone (F1–F6) |
+| Eng. | WCAG conformance | ⚠️ Not done | No dedicated accessibility audit was performed in this pass — recommend a follow-up axe/Lighthouse pass before launch |
+
+**Open decisions still requiring user confirmation** (per spec's explicit instruction not to decide unilaterally):
+- Whether to integrate a real payment rail for subscriptions/featured placement (8b/8c currently manual-admin-only).
+- Whether Paystack's hosted checkout needs live testing against non-Kenyan cards before the "global reach" claim (9a) is fully trusted.
+- A dedicated WCAG/accessibility audit pass was not performed and remains open.
