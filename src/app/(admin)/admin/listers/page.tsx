@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { KycVerifyButton } from "@/components/admin/kyc-verify-button";
+import { BanListerButton } from "@/components/admin/ban-lister-button";
+import { UnbanListerButton } from "@/components/admin/unban-lister-button";
+import { banListerAction } from "./actions";
 import { displayPhone } from "@/lib/phone";
 
 export const metadata: Metadata = { title: "Lister KYC" };
 
 export default async function AdminListersPage() {
+  const session = await auth();
+  const isAdmin = session?.user.role === "ADMIN";
+
   const listers = await prisma.user.findMany({
     where: { role: "LISTER" },
     select: {
@@ -16,6 +23,8 @@ export default async function AdminListersPage() {
       email: true,
       idNumber: true,
       idVerifiedAt: true,
+      bannedAt: true,
+      banReason: true,
       createdAt: true,
       _count: { select: { listings: true } },
     },
@@ -52,7 +61,17 @@ export default async function AdminListersPage() {
                   </p>
                   <p className="text-xs text-muted-foreground">{lister._count.listings} listing(s)</p>
                 </div>
-                <KycVerifyButton userId={lister.id} />
+                <div className="flex items-center gap-2">
+                  <KycVerifyButton userId={lister.id} />
+                  {isAdmin &&
+                    (lister.bannedAt ? (
+                      <UnbanListerButton userId={lister.id} />
+                    ) : (
+                      <form action={banListerAction.bind(null, lister.id)}>
+                        <BanListerButton />
+                      </form>
+                    ))}
+                </div>
               </div>
             ))}
           </div>
@@ -71,12 +90,27 @@ export default async function AdminListersPage() {
                 <p className="text-sm font-medium text-foreground">{lister.name}</p>
                 <p className="text-sm text-muted-foreground">{displayPhone(lister.phone)}</p>
                 <p className="text-xs text-muted-foreground">{lister._count.listings} listing(s)</p>
+                {lister.bannedAt && (
+                  <p className="text-xs text-destructive">Banned: {lister.banReason}</p>
+                )}
               </div>
-              {lister.idVerifiedAt ? (
-                <Badge>ID verified</Badge>
-              ) : (
-                <Badge variant="outline">No ID submitted</Badge>
-              )}
+              <div className="flex items-center gap-2">
+                {lister.bannedAt ? (
+                  <Badge variant="destructive">Banned</Badge>
+                ) : lister.idVerifiedAt ? (
+                  <Badge>ID verified</Badge>
+                ) : (
+                  <Badge variant="outline">No ID submitted</Badge>
+                )}
+                {isAdmin &&
+                  (lister.bannedAt ? (
+                    <UnbanListerButton userId={lister.id} />
+                  ) : (
+                    <form action={banListerAction.bind(null, lister.id)}>
+                      <BanListerButton />
+                    </form>
+                  ))}
+              </div>
             </div>
           ))}
         </div>

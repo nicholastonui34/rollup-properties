@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { initializeTransaction } from "@/lib/paystack";
 import { UNLOCK_PRICE_KES } from "@/lib/listing-options";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 async function getBaseUrl() {
   const h = await headers();
@@ -22,6 +23,10 @@ export async function initiateUnlockAction(listingId: string) {
   const listing = await prisma.listing.findUnique({ where: { id: listingId } });
   if (!listing || listing.status !== "LIVE") redirect("/search");
   if (listing.listerId === session.user.id) redirect(`/listings/${listing.slug}`);
+
+  if (!checkRateLimit(`unlock:${session.user.id}`, 5, 10 * 60 * 1000)) {
+    redirect(`/listings/${listing.slug}?unlock_failed=1`);
+  }
 
   const existing = await prisma.unlock.findUnique({
     where: { userId_listingId: { userId: session.user.id, listingId } },

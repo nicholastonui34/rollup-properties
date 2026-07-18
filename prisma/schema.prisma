@@ -85,6 +85,8 @@ model User {
   role          Role      @default(SEEKER)
   idNumber      String?
   idVerifiedAt  DateTime?
+  bannedAt      DateTime?
+  banReason     String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

@@ -4,10 +4,15 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { REPORT_AUTO_SUSPEND_THRESHOLD } from "@/lib/listing-options";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function reportListingAction(listingId: string, formData: FormData) {
   const session = await auth();
   if (!session?.user) redirect("/login");
+
+  if (!checkRateLimit(`report:${session.user.id}`, 5, 60 * 60 * 1000)) {
+    throw new Error("Too many reports submitted recently — please try again later.");
+  }
 
   const reason = String(formData.get("reason") ?? "").trim();
   const details = String(formData.get("details") ?? "").trim();

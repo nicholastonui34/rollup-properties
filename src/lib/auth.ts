@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { normalizeKenyanPhone } from "@/lib/phone";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { Role } from "@prisma/client";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -14,10 +15,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         identifier: { label: "Phone or email" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials) => {
+      authorize: async (credentials, request) => {
         const identifier = String(credentials?.identifier ?? "").trim();
         const password = String(credentials?.password ?? "");
         if (!identifier || !password) return null;
+
+        const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+        if (!checkRateLimit(`login:${ip}`, 10, 5 * 60 * 1000)) return null;
 
         const phone = normalizeKenyanPhone(identifier);
         const user = await prisma.user.findFirst({
@@ -32,6 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return null;
+        if (user.bannedAt) return null;
 
         return {
           id: user.id,
