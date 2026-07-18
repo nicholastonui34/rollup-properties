@@ -35,8 +35,9 @@ export default async function EditListingPage({
     }),
   ]);
 
+  if (!session?.user) redirect("/login");
   if (!listing) notFound();
-  if (listing.listerId !== session!.user.id && session!.user.role !== "ADMIN") {
+  if (listing.listerId !== session.user.id && session.user.role !== "ADMIN") {
     redirect("/dashboard");
   }
 
