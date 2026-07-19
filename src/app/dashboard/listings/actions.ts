@@ -49,6 +49,19 @@ const listingSchema = z.object({
     .refine((v) => v === undefined || toVideoEmbedUrl(v) !== null, {
       message: "Video link must be a YouTube or Vimeo URL",
     }),
+  managerAgencyName: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v ? v : undefined)),
+  managerWebsiteUrl: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v ? v : undefined))
+    .refine((v) => v === undefined || z.string().url().safeParse(v).success, {
+      message: "Enter a valid website URL",
+    }),
   areaId: z.string().min(1, "Select an area"),
   estate: z.string().trim().optional(),
   streetAddress: z.string().trim().min(3, "Enter a street address or landmark"),
@@ -80,6 +93,8 @@ function parseListingForm(formData: FormData) {
     sizeSqm: formData.get("sizeSqm") || undefined,
     tourEmbedUrl: formData.get("tourEmbedUrl") || undefined,
     videoUrl: formData.get("videoUrl") || undefined,
+    managerAgencyName: formData.get("managerAgencyName") || undefined,
+    managerWebsiteUrl: formData.get("managerWebsiteUrl") || undefined,
     areaId: formData.get("areaId"),
     estate: formData.get("estate"),
     streetAddress: formData.get("streetAddress"),
@@ -167,6 +182,8 @@ export async function createListingAction(
         sizeSqm: parsed.data.sizeSqm ?? null,
         tourEmbedUrl: parsed.data.tourEmbedUrl ?? null,
         videoUrl: parsed.data.videoUrl ? toVideoEmbedUrl(parsed.data.videoUrl) : null,
+        managerAgencyName: parsed.data.managerAgencyName ?? null,
+        managerWebsiteUrl: parsed.data.managerWebsiteUrl ?? null,
         county: area.county,
         town: area.town,
         areaId: area.id,
@@ -233,6 +250,8 @@ export async function updateListingAction(
         sizeSqm: parsed.data.sizeSqm ?? null,
         tourEmbedUrl: parsed.data.tourEmbedUrl ?? null,
         videoUrl: parsed.data.videoUrl ? toVideoEmbedUrl(parsed.data.videoUrl) : null,
+        managerAgencyName: parsed.data.managerAgencyName ?? null,
+        managerWebsiteUrl: parsed.data.managerWebsiteUrl ?? null,
         county: area.county,
         town: area.town,
         areaId: area.id,

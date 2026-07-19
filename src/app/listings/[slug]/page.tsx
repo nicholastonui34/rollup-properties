@@ -17,6 +17,7 @@ import { SITE_URL } from "@/lib/site";
 import { initiateUnlockAction } from "./unlock-actions";
 import { UnlockDialog } from "@/components/listing/unlock-dialog";
 import { BookTourDialog } from "@/components/listing/book-tour-dialog";
+import { RealtorLink } from "@/components/listing/realtor-link";
 import { FavoriteButton } from "@/components/listing/favorite-button";
 import { ReportButton } from "@/components/listing/report-button";
 import { toggleFavoriteAction } from "@/app/favorites/actions";
@@ -329,6 +330,15 @@ export default async function ListingDetailPage({
                     <Link href="/unlocks" className="mt-1 inline-block text-xs font-medium text-primary hover:underline">
                       View receipt
                     </Link>
+                  )}
+                  {listing.managerWebsiteUrl && listing.managerAgencyName && (
+                    <div>
+                      <RealtorLink
+                        url={listing.managerWebsiteUrl}
+                        agencyName={listing.managerAgencyName}
+                        listingId={listing.id}
+                      />
+                    </div>
                   )}
                 </>
               ) : listing.status !== "LIVE" ? (

@@ -121,6 +121,8 @@ export default async function EditListingPage({
             sizeSqm: listing.sizeSqm,
             tourEmbedUrl: listing.tourEmbedUrl,
             videoUrl: listing.videoUrl,
+            managerAgencyName: listing.managerAgencyName,
+            managerWebsiteUrl: listing.managerWebsiteUrl,
             areaId: listing.areaId,
             estate: listing.estate,
             streetAddress: listing.streetAddress,

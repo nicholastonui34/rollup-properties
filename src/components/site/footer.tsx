@@ -24,12 +24,45 @@ async function getExploreLinks() {
   }));
 }
 
+const FOOTER_COLUMNS = [
+  {
+    title: "Company",
+    links: [
+      { href: "/about", label: "About" },
+      { href: "/careers", label: "Careers" },
+      { href: "/news", label: "News" },
+    ],
+  },
+  {
+    title: "Support",
+    links: [
+      { href: "/help", label: "Help" },
+      { href: "/help#contact", label: "Contact" },
+    ],
+  },
+  {
+    title: "Partners",
+    links: [
+      { href: "/advertise", label: "Advertise" },
+      { href: "/signup?role=LISTER", label: "List with Us / Pro Media" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { href: "/applicant-privacy-notice", label: "Applicant Privacy Notice" },
+      { href: "/privacy", label: "Privacy Policy" },
+      { href: "/terms", label: "Terms of Service" },
+    ],
+  },
+];
+
 export async function SiteFooter() {
   const exploreLinks = await getExploreLinks();
   return (
     <footer className="border-t border-border bg-secondary/50">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-3">
-        <div className="space-y-3">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 sm:grid-cols-2 md:grid-cols-6">
+        <div className="space-y-3 sm:col-span-2 md:col-span-1">
           <Logo />
           <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
             Verified homes across Kenya. Real photos, real addresses, honest
@@ -37,51 +70,41 @@ export async function SiteFooter() {
           </p>
         </div>
 
-        <div className={exploreLinks.length === 0 ? "hidden" : ""}>
-          <h3 className="mb-3 text-sm font-semibold text-foreground">Explore</h3>
-          <ul className="space-y-2 text-sm">
-            {exploreLinks.map((l) => (
-              <li key={l.href}>
-                <Link
-                  href={l.href}
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {l.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {exploreLinks.length > 0 && (
+          <div>
+            <h3 className="mb-3 text-sm font-semibold text-foreground">Explore</h3>
+            <ul className="space-y-2 text-sm">
+              {exploreLinks.map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-        <div>
-          <h3 className="mb-3 text-sm font-semibold text-foreground">Get started</h3>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link
-                href="/signup"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Create a free account
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/signup?role=LISTER"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                List your property
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/login"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Log in
-              </Link>
-            </li>
-          </ul>
-        </div>
+        {FOOTER_COLUMNS.map((column) => (
+          <div key={column.title}>
+            <h3 className="mb-3 text-sm font-semibold text-foreground">{column.title}</h3>
+            <ul className="space-y-2 text-sm">
+              {column.links.map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
       <div className="border-t border-border/70 py-4">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 text-xs text-muted-foreground sm:px-6">

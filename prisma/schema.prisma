@@ -167,6 +167,8 @@ model Listing {
   sizeSqm          Int?
   tourEmbedUrl     String?
   videoUrl         String?
+  managerWebsiteUrl   String?
+  managerAgencyName   String?
   county           String
   town             String
   areaId           String?
@@ -235,6 +237,23 @@ model TourRequest {
   createdAt     DateTime          @default(now())
 
   @@index([listingId, status])
+}
+
+model CareerApplication {
+  id        String   @id @default(cuid())
+  // Static role slug from src/lib/careers.ts, not a DB relation — roles are
+  // edited in code (V2 §6 lets either DB or a data file own the role list;
+  // a data file needs no admin CRUD for an MVP-sized roles page). Null means
+  // a general/talent-pool application submitted with no specific role open.
+  roleSlug  String?
+  name      String
+  phone     String
+  email     String?
+  cvUrl     String?
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([roleSlug])
 }
 
 model MediaRequest {

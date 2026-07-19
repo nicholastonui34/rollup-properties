@@ -40,6 +40,8 @@ type ExistingListing = {
   sizeSqm: number | null;
   tourEmbedUrl: string | null;
   videoUrl: string | null;
+  managerWebsiteUrl: string | null;
+  managerAgencyName: string | null;
   areaId: string | null;
   estate: string | null;
   streetAddress: string;
@@ -266,6 +268,37 @@ export function ListingForm({
               defaultValue={listing?.videoUrl ?? ""}
             />
             <p className="text-xs text-muted-foreground">YouTube or Vimeo link.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Agency website (optional)</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Shown after a seeker unlocks your contact, alongside your phone number — a bonus
+            channel, not a replacement for direct contact.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="managerAgencyName">Agency name</Label>
+            <Input
+              id="managerAgencyName"
+              name="managerAgencyName"
+              placeholder="e.g. Cedar Park Property Managers"
+              defaultValue={listing?.managerAgencyName ?? ""}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="managerWebsiteUrl">Website URL</Label>
+            <Input
+              id="managerWebsiteUrl"
+              name="managerWebsiteUrl"
+              type="url"
+              placeholder="https://example.com"
+              defaultValue={listing?.managerWebsiteUrl ?? ""}
+            />
           </div>
         </div>
       </section>
