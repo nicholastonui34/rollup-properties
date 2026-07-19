@@ -69,6 +69,7 @@ enum PaymentPurpose {
   BUNDLE
   FEATURED
   SUBSCRIPTION
+  LISTING_FEE
 }
 
 enum ReportStatus {
@@ -76,6 +77,30 @@ enum ReportStatus {
   INVESTIGATING
   REFUNDED
   REJECTED
+}
+
+enum TourTimeSlot {
+  MORNING
+  AFTERNOON
+  EVENING
+}
+
+enum TourType {
+  IN_PERSON
+  VIDEO_CALL
+}
+
+enum TourRequestStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum MediaRequestStatus {
+  NEW
+  SCHEDULED
+  DELIVERED
 }
 
 // Schema-only for now (spec §8): no billing/enforcement wired up, just the
@@ -98,6 +123,10 @@ model User {
   bannedAt      DateTime?
   banReason     String?
   planTier      PlanTier  @default(FREE)
+  // Cumulative free listing publishes (V2 §14) — admin-adjustable for comps/overrides.
+  // Actual usage is COUNTED from Listing.publishedAt, not stored as a running tally,
+  // so it can never drift out of sync.
+  freeListingQuota Int    @default(20)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -108,6 +137,7 @@ model User {
   savedListings SavedListing[]
   savedSearches SavedSearch[]
   reports       Report[]
+  mediaRequests MediaRequest[]
 }
 
 model Area {
@@ -145,11 +175,18 @@ model Listing {
   streetAddress    String
   lat              Float?
   lng              Float?
+  geocodedAt       DateTime?
+  amenitiesSnapshot Json?
+  amenitiesFetchedAt DateTime?
   bedrooms         Int            @default(0)
   bathrooms        Int            @default(0)
   furnished        Boolean        @default(false)
   amenities        String[]
   status           ListingStatus  @default(DRAFT)
+  // First-ever successful publish (submit-for-verification) — set once and never
+  // cleared. Marks that this listing already consumed a free-quota slot or paid the
+  // KES 99 fee, so resubmitting after edits/NEEDS_INFO never charges twice.
+  publishedAt      DateTime?
   verifiedAt       DateTime?
   verifiedById     String?
   lastConfirmedAt  DateTime?
@@ -165,6 +202,8 @@ model Listing {
   payments      Payment[]
   savedBy       SavedListing[]
   reports       Report[]
+  tourRequests  TourRequest[]
+  mediaRequests MediaRequest[]
 
   @@index([status, purpose, town])
   @@index([areaId])
@@ -179,6 +218,39 @@ model ListingImage {
   publicId  String
   position  Int     @default(0)
   isCover   Boolean @default(false)
+}
+
+model TourRequest {
+  id            String            @id @default(cuid())
+  listingId     String
+  listing       Listing           @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  name          String
+  phone         String
+  email         String?
+  preferredDate DateTime
+  timeSlot      TourTimeSlot
+  tourType      TourType
+  message       String?
+  status        TourRequestStatus @default(PENDING)
+  createdAt     DateTime          @default(now())
+
+  @@index([listingId, status])
+}
+
+model MediaRequest {
+  id            String             @id @default(cuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id])
+  listingId     String?
+  listing       Listing?           @relation(fields: [listingId], references: [id])
+  services      String[]
+  location      String
+  preferredDate DateTime?
+  notes         String?
+  status        MediaRequestStatus @default(NEW)
+  createdAt     DateTime           @default(now())
+
+  @@index([status])
 }
 
 model Verification {

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmSubmitButton } from "@/components/listing/confirm-submit-button";
 import { KycCard } from "@/components/dashboard/kyc-card";
+import { BoostListingDialog } from "@/components/dashboard/boost-listing-dialog";
 import {
   deleteListingAction,
   renewListingAction,
@@ -25,7 +26,7 @@ export const metadata: Metadata = { title: "Your listings" };
 
 export default async function DashboardPage() {
   const session = await auth();
-  const [user, listings] = await Promise.all([
+  const [user, listings, pendingTourRequests] = await Promise.all([
     prisma.user.findUnique({
       where: { id: session!.user.id },
       select: { idNumber: true, idVerifiedAt: true },
@@ -36,8 +37,16 @@ export default async function DashboardPage() {
         images: { where: { isCover: true }, take: 1 },
         _count: { select: { images: true, unlocks: true } },
         verifications: { orderBy: { createdAt: "desc" }, take: 1 },
+        payments: {
+          where: { purpose: "LISTING_FEE" },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
       },
       orderBy: { updatedAt: "desc" },
+    }),
+    prisma.tourRequest.count({
+      where: { listing: { listerId: session!.user.id }, status: "PENDING" },
     }),
   ]);
 
@@ -52,9 +61,18 @@ export default async function DashboardPage() {
             Create, edit and track verification status.
           </p>
         </div>
-        <Button asChild size="lg">
-          <Link href="/dashboard/listings/new">New listing</Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <BoostListingDialog />
+          <Button asChild variant="outline" size="lg">
+            <Link href="/dashboard/tours">
+              Tour requests
+              {pendingTourRequests > 0 && <Badge className="ml-1">{pendingTourRequests}</Badge>}
+            </Link>
+          </Button>
+          <Button asChild size="lg">
+            <Link href="/dashboard/listings/new">New listing</Link>
+          </Button>
+        </div>
       </div>
 
       {session?.user.role === "LISTER" && (
@@ -78,6 +96,8 @@ export default async function DashboardPage() {
               listing.status === "DRAFT" ||
               listing.status === "NEEDS_INFO" ||
               listing.status === "REJECTED";
+            const pendingPayment =
+              !listing.publishedAt && listing.payments[0]?.status === "PENDING" ? listing.payments[0] : null;
             return (
               <div
                 key={listing.id}
@@ -117,6 +137,11 @@ export default async function DashboardPage() {
                       {listing.expiresAt.toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
                     </p>
                   )}
+                  {pendingPayment && (
+                    <p className="mt-2 rounded-lg bg-secondary px-2.5 py-1.5 text-xs text-secondary-foreground">
+                      Payment pending — complete it to publish this listing.
+                    </p>
+                  )}
                   {(listing.status === "NEEDS_INFO" || listing.status === "REJECTED") &&
                     listing.verifications[0]?.notes && (
                       <p className="mt-2 rounded-lg bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive">
@@ -143,16 +168,22 @@ export default async function DashboardPage() {
                         <Link href={`/listings/${listing.slug}`}>View live</Link>
                       </Button>
                     )}
-                    {canSubmit && (
-                      <form action={submitListingAction.bind(null, listing.id)}>
-                        <Button
-                          type="submit"
-                          size="sm"
-                          disabled={listing._count.images < MIN_LISTING_PHOTOS}
-                        >
-                          Submit for verification
-                        </Button>
-                      </form>
+                    {pendingPayment ? (
+                      <Button asChild size="sm">
+                        <Link href={`/dashboard/listings/${listing.id}/pay`}>Complete payment</Link>
+                      </Button>
+                    ) : (
+                      canSubmit && (
+                        <form action={submitListingAction.bind(null, listing.id)}>
+                          <Button
+                            type="submit"
+                            size="sm"
+                            disabled={listing._count.images < MIN_LISTING_PHOTOS}
+                          >
+                            Submit for verification
+                          </Button>
+                        </form>
+                      )
                     )}
                     {listing.status === "LIVE" && (
                       <form action={renewListingAction.bind(null, listing.id)}>

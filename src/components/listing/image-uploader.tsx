@@ -11,7 +11,7 @@ import {
   removeListingImageAction,
   setCoverImageAction,
 } from "@/app/dashboard/listings/actions";
-import { MIN_LISTING_PHOTOS } from "@/lib/listing-options";
+import { MAX_LISTING_PHOTOS, MIN_LISTING_PHOTOS, STRONG_LISTING_PHOTO_COUNT } from "@/lib/listing-options";
 
 type ListingImage = { id: string; url: string; isCover: boolean };
 
@@ -32,6 +32,12 @@ export function ImageUploader({
     if (!files || files.length === 0) return;
     setError(null);
 
+    const slotsLeft = Math.max(0, MAX_LISTING_PHOTOS - images.length);
+    if (slotsLeft === 0) {
+      setError(`Listings can have at most ${MAX_LISTING_PHOTOS} photos.`);
+      return;
+    }
+
     const signRes = await fetch("/api/cloudinary/sign", { method: "POST" });
     if (!signRes.ok) {
       const body = await signRes.json().catch(() => ({}));
@@ -40,7 +46,10 @@ export function ImageUploader({
     }
     const { cloudName, apiKey, signature, timestamp, folder } = await signRes.json();
 
-    const list = Array.from(files);
+    const list = Array.from(files).slice(0, slotsLeft);
+    if (files.length > slotsLeft) {
+      setError(`Only ${slotsLeft} more photo${slotsLeft === 1 ? "" : "s"} will fit — uploading the first ${slotsLeft}.`);
+    }
     setUploading(list.length);
 
     for (const file of list) {
@@ -76,25 +85,31 @@ export function ImageUploader({
   }
 
   const remaining = Math.max(0, MIN_LISTING_PHOTOS - images.length);
+  const slotsLeft = Math.max(0, MAX_LISTING_PHOTOS - images.length);
+  const atCap = slotsLeft === 0;
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-foreground">
-            Photos ({images.length})
+            Photos ({images.length} / {MAX_LISTING_PHOTOS})
           </p>
           <p className="text-xs text-muted-foreground">
             {remaining > 0
               ? `Add at least ${remaining} more photo${remaining === 1 ? "" : "s"} to submit for verification.`
-              : "Minimum photo count met. Add more for a stronger listing."}
+              : images.length < STRONG_LISTING_PHOTO_COUNT
+                ? `Listings with ${STRONG_LISTING_PHOTO_COUNT}+ photos get significantly more inquiries.`
+                : atCap
+                  ? "Photo limit reached."
+                  : "Minimum photo count met. Add more for a stronger listing."}
           </p>
         </div>
         <Button
           type="button"
           variant="outline"
           size="sm"
-          disabled={uploading > 0}
+          disabled={uploading > 0 || atCap}
           onClick={() => fileInputRef.current?.click()}
         >
           {uploading > 0 ? `Uploading ${uploading}…` : "Add photos"}

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ListingForm } from "@/components/listing/listing-form";
 import { ImageUploader } from "@/components/listing/image-uploader";
+import { BoostListingDialog } from "@/components/dashboard/boost-listing-dialog";
 import { updateListingAction, submitListingAction } from "@/app/dashboard/listings/actions";
 import {
   LISTING_STATUS_BADGE_VARIANT,
@@ -18,10 +19,13 @@ export const metadata: Metadata = { title: "Edit listing" };
 
 export default async function EditListingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ published?: string; payment_failed?: string }>;
 }) {
   const { id } = await params;
+  const { published, payment_failed } = await searchParams;
   const session = await auth();
 
   const [listing, areas] = await Promise.all([
@@ -60,6 +64,28 @@ export default async function EditListingPage({
           </Badge>
         </div>
       </div>
+
+      {published === "1" && (
+        <div className="rounded-lg bg-primary/10 px-4 py-2 text-sm text-primary">
+          Payment received — your listing is published and headed to verification.
+        </div>
+      )}
+      {payment_failed === "1" && (
+        <div className="rounded-lg bg-destructive/10 px-4 py-2 text-sm text-destructive">
+          Payment didn&apos;t go through, so you haven&apos;t been charged. You can try again below.
+        </div>
+      )}
+
+      {!canSubmit && listing.status !== "DRAFT" && (
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-border p-4">
+          <p className="text-sm text-muted-foreground">Get more inquiries with professional photos or a video tour.</p>
+          <BoostListingDialog
+            listingId={listing.id}
+            defaultLocation={[listing.streetAddress, listing.estate, listing.town].filter(Boolean).join(", ")}
+            triggerLabel="Boost this listing"
+          />
+        </div>
+      )}
 
       <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
         <ImageUploader listingId={listing.id} images={listing.images} />

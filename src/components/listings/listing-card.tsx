@@ -4,6 +4,7 @@ import { BedDouble, Bath, MapPin, ShieldCheck, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PROPERTY_TYPE_LABELS, listingStatusLabel } from "@/lib/listing-options";
+import { normalizeListingTitle } from "@/lib/listing-title";
 import type { ListingCardData } from "@/lib/search";
 import { toggleFavoriteAction } from "@/app/favorites/actions";
 import { FavoriteButton } from "@/components/listing/favorite-button";
@@ -20,6 +21,7 @@ export function ListingCard({
   path?: string;
 }) {
   const cover = listing.images[0]?.url;
+  const title = normalizeListingTitle(listing.title, listing.propertyType);
   const location = listing.area?.name ?? listing.estate ?? listing.town;
   const isVerified = Boolean(listing.verifiedAt);
   const isFeatured = Boolean(listing.featuredUntil && !isPast(listing.featuredUntil));
@@ -30,11 +32,11 @@ export function ListingCard({
   return (
     <Card className="overflow-hidden py-0 transition-shadow hover:shadow-md">
       <Link href={`/listings/${listing.slug}`} className="group block">
-        <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
+        <div className="relative aspect-square w-full overflow-hidden bg-muted">
           {cover ? (
             <Image
               src={cover}
-              alt={listing.title}
+              alt={title}
               fill
               sizes="(min-width: 1024px) 320px, (min-width: 640px) 45vw, 90vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -79,7 +81,7 @@ export function ListingCard({
               <span className="text-sm font-normal text-muted-foreground"> /month</span>
             )}
           </p>
-          <h3 className="truncate text-sm font-medium text-foreground">{listing.title}</h3>
+          <h3 className="truncate text-sm font-medium text-foreground">{title}</h3>
           <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
             <MapPin className="size-3.5 shrink-0" />
             {location}, {listing.town}

@@ -7,8 +7,9 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 import { deleteCloudinaryImage } from "@/lib/cloudinary";
-import { MIN_LISTING_PHOTOS } from "@/lib/listing-options";
+import { FREE_LISTING_QUOTA, MAX_LISTING_PHOTOS, MIN_LISTING_PHOTOS } from "@/lib/listing-options";
 import { isAllowedTourUrl, toVideoEmbedUrl } from "@/lib/media-embed";
+import { geocodeAddress } from "@/lib/geocoding";
 
 export type ListingFormState = { error?: string } | undefined;
 
@@ -91,6 +92,31 @@ function parseListingForm(formData: FormData) {
   });
 }
 
+// Listers can optionally drop a manual pin (MapPicker); when they don't, we
+// silently geocode the address server-side so every listing still gets
+// coordinates for the map/amenities modules — zero extra effort either way.
+async function resolveGeo(input: {
+  areaName: string | null;
+  town: string;
+  estate?: string | null;
+  streetAddress: string;
+  lat?: number;
+  lng?: number;
+}): Promise<{ lat: number | null; lng: number | null; geocodedAt: Date | null }> {
+  if (input.lat != null && input.lng != null) {
+    return { lat: input.lat, lng: input.lng, geocodedAt: null };
+  }
+  const geo = await geocodeAddress({
+    streetAddress: input.streetAddress,
+    estate: input.estate,
+    areaName: input.areaName,
+    town: input.town,
+  });
+  return geo
+    ? { lat: geo.lat, lng: geo.lng, geocodedAt: new Date() }
+    : { lat: null, lng: null, geocodedAt: null };
+}
+
 async function uniqueSlug(title: string) {
   const base = slugify(title) || "listing";
   let slug = base;
@@ -116,6 +142,14 @@ export async function createListingAction(
   if (!area) return { error: "Select a valid area" };
 
   const slug = await uniqueSlug(parsed.data.title);
+  const geo = await resolveGeo({
+    areaName: area.name,
+    town: area.town,
+    estate: parsed.data.estate,
+    streetAddress: parsed.data.streetAddress,
+    lat: parsed.data.lat,
+    lng: parsed.data.lng,
+  });
 
   let listingId: string;
   try {
@@ -138,8 +172,9 @@ export async function createListingAction(
         areaId: area.id,
         estate: parsed.data.estate || null,
         streetAddress: parsed.data.streetAddress,
-        lat: parsed.data.lat ?? null,
-        lng: parsed.data.lng ?? null,
+        lat: geo.lat,
+        lng: geo.lng,
+        geocodedAt: geo.geocodedAt,
         bedrooms: parsed.data.bedrooms,
         bathrooms: parsed.data.bathrooms,
         furnished: parsed.data.furnished,
@@ -175,6 +210,15 @@ export async function updateListingAction(
   const area = await prisma.area.findUnique({ where: { id: parsed.data.areaId } });
   if (!area) return { error: "Select a valid area" };
 
+  const geo = await resolveGeo({
+    areaName: area.name,
+    town: area.town,
+    estate: parsed.data.estate,
+    streetAddress: parsed.data.streetAddress,
+    lat: parsed.data.lat,
+    lng: parsed.data.lng,
+  });
+
   try {
     await prisma.listing.update({
       where: { id: listingId },
@@ -194,8 +238,9 @@ export async function updateListingAction(
         areaId: area.id,
         estate: parsed.data.estate || null,
         streetAddress: parsed.data.streetAddress,
-        lat: parsed.data.lat ?? null,
-        lng: parsed.data.lng ?? null,
+        lat: geo.lat,
+        lng: geo.lng,
+        geocodedAt: geo.geocodedAt,
         bedrooms: parsed.data.bedrooms,
         bathrooms: parsed.data.bathrooms,
         furnished: parsed.data.furnished,
@@ -229,12 +274,34 @@ export async function submitListingAction(listingId: string) {
     throw new Error(`Add at least ${MIN_LISTING_PHOTOS} photos before submitting.`);
   }
 
-  await prisma.listing.update({
-    where: { id: listingId },
-    data: { status: "SUBMITTED" },
+  // Already published once before (resubmission after edits / NEEDS_INFO) —
+  // it already consumed a quota slot or was paid for; never charge twice.
+  if (listing.publishedAt) {
+    await prisma.listing.update({ where: { id: listingId }, data: { status: "SUBMITTED" } });
+    revalidatePath("/dashboard");
+    revalidatePath(`/dashboard/listings/${listingId}/edit`);
+    return;
+  }
+
+  // First-ever publish — enforce the free-quota gate server-side (V2 §14.1).
+  // The client never decides this; it only ever sees the outcome.
+  const lister = await prisma.user.findUnique({ where: { id: listing.listerId } });
+  const publishedCount = await prisma.listing.count({
+    where: { listerId: listing.listerId, publishedAt: { not: null } },
   });
-  revalidatePath("/dashboard");
-  revalidatePath(`/dashboard/listings/${listingId}/edit`);
+  const quota = lister?.freeListingQuota ?? FREE_LISTING_QUOTA;
+
+  if (publishedCount < quota) {
+    await prisma.listing.update({
+      where: { id: listingId },
+      data: { status: "SUBMITTED", publishedAt: new Date() },
+    });
+    revalidatePath("/dashboard");
+    revalidatePath(`/dashboard/listings/${listingId}/edit`);
+    return;
+  }
+
+  redirect(`/dashboard/listings/${listingId}/pay`);
 }
 
 // Listings expire 30 days after going LIVE (set on verification approval), not on submission —
@@ -293,6 +360,12 @@ export async function addListingImageAction(
   }
 
   const count = await prisma.listingImage.count({ where: { listingId } });
+  if (count >= MAX_LISTING_PHOTOS) {
+    // The file already landed in Cloudinary via the client's direct upload — clean it
+    // up rather than leaving an orphaned asset since we're rejecting the DB record.
+    await deleteCloudinaryImage(parsed.data.publicId);
+    throw new Error(`Listings can have at most ${MAX_LISTING_PHOTOS} photos.`);
+  }
   await prisma.listingImage.create({
     data: {
       listingId,

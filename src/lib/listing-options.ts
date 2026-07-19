@@ -1,4 +1,13 @@
-import type { ListingPurpose, ListingStatus, PropertyType, ReportStatus } from "@prisma/client";
+import type {
+  ListingPurpose,
+  ListingStatus,
+  MediaRequestStatus,
+  PropertyType,
+  ReportStatus,
+  TourRequestStatus,
+  TourTimeSlot,
+  TourType,
+} from "@prisma/client";
 
 export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
   BEDSITTER: "Bedsitter",
@@ -30,9 +39,31 @@ export const AMENITIES = [
 ] as const;
 
 export const MIN_LISTING_PHOTOS = 5;
+export const MAX_LISTING_PHOTOS = 30;
+// Soft nudge shown in the uploader below this count (V2 §2) — not enforced, just copy.
+export const STRONG_LISTING_PHOTO_COUNT = 8;
 
 // KES 99 launch price (BRIEF.md §5) — impulse-priced, well under typical broker viewing fees.
 export const UNLOCK_PRICE_KES = 99;
+
+// V2 §14.1 — first 20 published listings per lister are free; #21 onward costs this.
+export const FREE_LISTING_QUOTA = 20;
+export const LISTING_PUBLISH_FEE_KES = 99;
+
+// V2 §14.2 — Pro Media Services. Pricing is placeholder ("from KES —") until
+// the team sets a real price list; services list is what the request form offers.
+export const PRO_MEDIA_SERVICES = [
+  "Professional photography",
+  "Video tour",
+  "3D / virtual tour",
+  "Other listing enhancement",
+] as const;
+
+export const MEDIA_REQUEST_STATUS_LABELS: Record<MediaRequestStatus, string> = {
+  NEW: "New",
+  SCHEDULED: "Scheduled",
+  DELIVERED: "Delivered",
+};
 
 export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
   DRAFT: "Draft",
@@ -102,3 +133,31 @@ export const REPORT_STATUS_BADGE_VARIANT: Record<
 // Freshness staleness cue on listing cards/detail — amber past this many
 // days since last confirmation (half the admin 60-day re-verification flag).
 export const STALE_AFTER_DAYS = 45;
+
+export const TOUR_TIME_SLOT_LABELS: Record<TourTimeSlot, string> = {
+  MORNING: "Morning",
+  AFTERNOON: "Afternoon",
+  EVENING: "Evening",
+};
+
+export const TOUR_TYPE_LABELS: Record<TourType, string> = {
+  IN_PERSON: "In-person",
+  VIDEO_CALL: "Video call",
+};
+
+export const TOUR_REQUEST_STATUS_LABELS: Record<TourRequestStatus, string> = {
+  PENDING: "Pending",
+  CONFIRMED: "Confirmed",
+  COMPLETED: "Completed",
+  CANCELLED: "Cancelled",
+};
+
+export const TOUR_REQUEST_STATUS_BADGE_VARIANT: Record<
+  TourRequestStatus,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
+  PENDING: "secondary",
+  CONFIRMED: "default",
+  COMPLETED: "outline",
+  CANCELLED: "destructive",
+};

@@ -14,10 +14,20 @@ export async function GET(req: NextRequest) {
   });
   if (!payment) return NextResponse.redirect(`${base}/`);
 
-  const listingUrl = payment.listing ? `${base}/listings/${payment.listing.slug}` : `${base}/`;
+  const isListingFee = payment.purpose === "LISTING_FEE";
+  const successUrl = isListingFee
+    ? `${base}/dashboard/listings/${payment.listingId}/edit?published=1`
+    : payment.listing
+      ? `${base}/listings/${payment.listing.slug}?unlocked=1`
+      : `${base}/`;
+  const failureUrl = isListingFee
+    ? `${base}/dashboard/listings/${payment.listingId}/edit?payment_failed=1`
+    : payment.listing
+      ? `${base}/listings/${payment.listing.slug}?unlock_failed=1`
+      : `${base}/`;
 
   if (payment.status === "SUCCESS") {
-    return NextResponse.redirect(`${listingUrl}?unlocked=1`);
+    return NextResponse.redirect(successUrl);
   }
 
   try {
@@ -25,12 +35,12 @@ export async function GET(req: NextRequest) {
     const amountOk = result.amountKobo === payment.amountKes * 100 && result.currency === "KES";
     if (result.status === "success" && amountOk) {
       await finalizeSuccessfulPayment(payment.id);
-      return NextResponse.redirect(`${listingUrl}?unlocked=1`);
+      return NextResponse.redirect(successUrl);
     }
     await prisma.payment.update({ where: { id: payment.id }, data: { status: "FAILED" } });
-    return NextResponse.redirect(`${listingUrl}?unlock_failed=1`);
+    return NextResponse.redirect(failureUrl);
   } catch (e) {
     console.error("paystack verify failed", e);
-    return NextResponse.redirect(`${listingUrl}?unlock_failed=1`);
+    return NextResponse.redirect(failureUrl);
   }
 }

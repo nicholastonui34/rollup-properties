@@ -1,3 +1,5 @@
+import { distanceKm } from "@/lib/distance";
+
 export interface University {
   slug: string;
   name: string;
@@ -23,3 +25,20 @@ export function findUniversity(slug: string | undefined): University | undefined
 // Radius within which a listing counts as "near campus" for the Student
 // Housing Hub filter.
 export const CAMPUS_RADIUS_KM = 10;
+
+// Tighter radius for the auto cross-link banner on a listing's own detail
+// page (V2 §4.4) — distinct from the broader Hub search-filter radius above.
+export const CROSS_LINK_RADIUS_KM = 3;
+
+export function nearestUniversityWithin(lat: number, lng: number, radiusKm: number): University | null {
+  let best: University | null = null;
+  let bestDistance = Infinity;
+  for (const u of UNIVERSITIES) {
+    const d = distanceKm(lat, lng, u.lat, u.lng);
+    if (d <= radiusKm && d < bestDistance) {
+      best = u;
+      bestDistance = d;
+    }
+  }
+  return best;
+}

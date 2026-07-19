@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -7,11 +6,17 @@ import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PROPERTY_TYPE_LABELS, UNLOCK_PRICE_KES, STALE_AFTER_DAYS, listingStatusLabel } from "@/lib/listing-options";
+import { normalizeListingTitle } from "@/lib/listing-title";
 import { displayPhone } from "@/lib/phone";
+import { LocationSection } from "@/components/listing/location-section";
+import { PhotoGallery } from "@/components/listing/photo-gallery";
+import { getAmenitiesSnapshot } from "@/lib/places";
+import { nearestUniversityWithin, CROSS_LINK_RADIUS_KM } from "@/lib/universities";
 import { daysSince } from "@/lib/dates";
 import { SITE_URL } from "@/lib/site";
 import { initiateUnlockAction } from "./unlock-actions";
 import { UnlockDialog } from "@/components/listing/unlock-dialog";
+import { BookTourDialog } from "@/components/listing/book-tour-dialog";
 import { FavoriteButton } from "@/components/listing/favorite-button";
 import { ReportButton } from "@/components/listing/report-button";
 import { toggleFavoriteAction } from "@/app/favorites/actions";
@@ -23,15 +28,19 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const listing = await prisma.listing.findUnique({ where: { slug }, select: { title: true, description: true } });
+  const listing = await prisma.listing.findUnique({
+    where: { slug },
+    select: { title: true, description: true, propertyType: true },
+  });
   if (!listing) return {};
+  const title = normalizeListingTitle(listing.title, listing.propertyType);
   const description = listing.description.slice(0, 155);
   return {
-    title: listing.title,
+    title,
     description,
     alternates: { canonical: `/listings/${slug}` },
-    openGraph: { title: listing.title, description, url: `${SITE_URL}/listings/${slug}` },
-    twitter: { title: listing.title, description },
+    openGraph: { title, description, url: `${SITE_URL}/listings/${slug}` },
+    twitter: { title, description },
   };
 }
 
@@ -80,6 +89,12 @@ export default async function ListingDetailPage({
         })
       : null;
 
+  const title = normalizeListingTitle(listing.title, listing.propertyType);
+  const amenities = listing.status === "LIVE" ? await getAmenitiesSnapshot(listing) : null;
+  const nearestUniversity =
+    listing.lat != null && listing.lng != null
+      ? nearestUniversityWithin(listing.lat, listing.lng, CROSS_LINK_RADIUS_KM)
+      : null;
   const cover = listing.images.find((i) => i.isCover) ?? listing.images[0];
   const gallery = listing.images.filter((i) => i.id !== cover?.id);
   const isVerified = Boolean(listing.verifiedAt);
@@ -94,7 +109,7 @@ export default async function ListingDetailPage({
           "@type": "RealEstateListing",
           "@id": `${SITE_URL}/listings/${listing.slug}`,
           url: `${SITE_URL}/listings/${listing.slug}`,
-          name: listing.title,
+          name: title,
           description: listing.description,
           datePosted: listing.verifiedAt?.toISOString() ?? listing.createdAt.toISOString(),
           image: listing.images.map((i) => i.url),
@@ -122,7 +137,7 @@ export default async function ListingDetailPage({
       : null;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-8 pb-24 sm:px-6 sm:pb-8">
       {jsonLd && (
         <script
           type="application/ld+json"
@@ -165,7 +180,7 @@ export default async function ListingDetailPage({
         <div className="relative mb-2 aspect-video overflow-hidden rounded-2xl bg-muted">
           <iframe
             src={listing.tourEmbedUrl ?? listing.videoUrl ?? undefined}
-            title={listing.tourEmbedUrl ? `${listing.title} — 3D tour` : `${listing.title} — video tour`}
+            title={listing.tourEmbedUrl ? `${title} — 3D tour` : `${title} — video tour`}
             loading="lazy"
             allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen"
             allowFullScreen
@@ -175,50 +190,11 @@ export default async function ListingDetailPage({
       )}
 
       {listing.images.length > 0 ? (
-        <>
-          {/* Mobile: swipeable carousel showing every photo (CSS scroll-snap, no JS). */}
-          <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto rounded-2xl sm:hidden">
-            {[cover, ...gallery].map((img, idx) =>
-              img ? (
-                <div
-                  key={img.id}
-                  className="relative aspect-video w-full flex-none snap-center overflow-hidden rounded-2xl"
-                >
-                  <Image
-                    src={img.url}
-                    alt={idx === 0 ? listing.title : ""}
-                    fill
-                    sizes="100vw"
-                    className="object-cover"
-                    priority={idx === 0 && !listing.tourEmbedUrl && !listing.videoUrl}
-                    loading={idx === 0 ? undefined : "lazy"}
-                  />
-                </div>
-              ) : null
-            )}
-          </div>
-
-          {/* Tablet/desktop: hero + grid of 4. */}
-          <div className="hidden grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl sm:grid">
-            <div className="relative col-span-2 row-span-2 aspect-video">
-              {cover && (
-                <Image
-                  src={cover.url}
-                  alt={listing.title}
-                  fill
-                  sizes="600px"
-                  className="object-cover"
-                  priority={!listing.tourEmbedUrl && !listing.videoUrl}
-                />
-              )}
-            </div>
-            {gallery.slice(0, 4).map((img) => (
-              <div key={img.id} className="relative col-span-2 row-span-1 aspect-square">
-                <Image src={img.url} alt="" fill sizes="300px" className="object-cover" loading="lazy" />
-              </div>
-            ))}
-          </div>
-        </>
+        <PhotoGallery
+          images={[cover, ...gallery].filter((img): img is NonNullable<typeof img> => Boolean(img))}
+          title={title}
+          priority={!listing.tourEmbedUrl && !listing.videoUrl}
+        />
       ) : !listing.tourEmbedUrl && !listing.videoUrl ? (
         <div className="flex aspect-video items-center justify-center rounded-2xl bg-muted text-sm text-muted-foreground">
           No photos yet
@@ -265,7 +241,7 @@ export default async function ListingDetailPage({
                 : "This listing hasn't completed Rollup's photo, address and ownership check yet — proceed with extra caution."}
             </p>
             <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              {listing.title}
+              {title}
             </h1>
             <p className="mt-1 text-muted-foreground">
               {listing.streetAddress}
@@ -300,6 +276,24 @@ export default async function ListingDetailPage({
               </div>
             </div>
           )}
+
+          {listing.lat != null && listing.lng != null && (
+            <div>
+              <h2 className="mb-2 text-sm font-semibold text-foreground">Location</h2>
+              {nearestUniversity && (
+                <Link
+                  href={`/search?purpose=RENT&university=${nearestUniversity.slug}`}
+                  className="mb-3 flex items-center justify-between gap-2 rounded-xl bg-secondary px-4 py-2.5 text-sm text-secondary-foreground hover:underline"
+                >
+                  <span>
+                    Near {nearestUniversity.name} — explore the Student Housing Hub
+                  </span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+              )}
+              <LocationSection lat={listing.lat} lng={listing.lng} label={title} amenities={amenities} />
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">
@@ -319,7 +313,7 @@ export default async function ListingDetailPage({
                 : "Not provided"}
             </p>
 
-            <div className="mt-5 rounded-xl border border-dashed border-border bg-muted/40 p-4 text-center">
+            <div id="contact-card" className="mt-5 rounded-xl border border-dashed border-border bg-muted/40 p-4 text-center">
               {hasAccess ? (
                 <>
                   <p className="text-sm font-medium text-foreground">{listing.lister.name}</p>
@@ -374,6 +368,10 @@ export default async function ListingDetailPage({
             </div>
           </div>
 
+          {!isOwner && listing.status === "LIVE" && (
+            <BookTourDialog listingId={listing.id} className="hidden w-full sm:flex" />
+          )}
+
           {isOwner && (
             <Button asChild variant="outline" className="w-full">
               <Link href={`/dashboard/listings/${listing.id}/edit`}>Edit listing</Link>
@@ -390,6 +388,15 @@ export default async function ListingDetailPage({
           )}
         </div>
       </div>
+
+      {!isOwner && listing.status === "LIVE" && (
+        <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-border bg-background p-3 shadow-lg sm:hidden">
+          <BookTourDialog listingId={listing.id} className="flex-1" />
+          <Button asChild size="lg" className="flex-1">
+            <a href="#contact-card">Contact</a>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

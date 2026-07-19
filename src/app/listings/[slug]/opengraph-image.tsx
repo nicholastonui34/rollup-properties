@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { prisma } from "@/lib/prisma";
 import { PROPERTY_TYPE_LABELS } from "@/lib/listing-options";
+import { normalizeListingTitle } from "@/lib/listing-title";
 
 export const alt = "Listing on Rollup Properties";
 export const size = { width: 1200, height: 630 };
@@ -28,6 +29,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   });
 
   const cover = listing?.images[0]?.url;
+  const title = listing ? normalizeListingTitle(listing.title, listing.propertyType) : undefined;
   const location = [listing?.estate, listing?.area?.name ?? listing?.town].filter(Boolean).join(", ");
 
   return new ImageResponse(
@@ -114,7 +116,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               maxWidth: 1000,
             }}
           >
-            {listing?.title ?? "Verified property on Rollup"}
+            {title ?? "Verified property on Rollup"}
           </span>
           {location && (
             <span style={{ fontSize: 28, color: "#dbe6e0", marginTop: 12 }}>{location}</span>

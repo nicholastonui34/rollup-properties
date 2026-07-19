@@ -250,9 +250,13 @@ function buildTitle(purpose: ListingPurpose, propertyType: PropertyType, bedroom
   const adj = pick(ADJECTIVES);
   const label = bedroomLabel(propertyType, bedrooms);
   const typeLabel = PROPERTY_TYPE_LABELS[propertyType];
+  // BEDSITTER/STUDIO's bedroomLabel() already equals typeLabel (both "Bedsitter"/"Studio") —
+  // appending both produced "Bedsitter Bedsitter"/"Studio Studio". Use the label once when
+  // they match instead of concatenating a duplicate.
+  const descriptor = label.toLowerCase() === typeLabel.toLowerCase() ? label : `${label} ${typeLabel}`;
   const core = propertyType === "LAND" || propertyType === "COMMERCIAL"
     ? `${adj} ${typeLabel} in ${areaName}`
-    : `${adj} ${label} ${typeLabel} in ${areaName}`;
+    : `${adj} ${descriptor} in ${areaName}`;
   return purpose === "SALE" ? `For Sale: ${core}` : core;
 }
 
@@ -276,8 +280,11 @@ function buildDescription(
     parts.push(pick(LANDMARK_SENTENCES));
     parts.push("Title deed ready and available for viewing on request.");
   } else {
+    // Same "bedsitter bedsitter"/"studio studio" collision as buildTitle() —
+    // bedroomLabel() already equals typeLabel for those two property types.
+    const descriptor = label.toLowerCase() === typeLabel ? label.toLowerCase() : `${label.toLowerCase()} ${typeLabel}`;
     parts.push(
-      `This ${label.toLowerCase()} ${typeLabel} is ${verb} in ${areaName}, ${town}. It has ${bedrooms > 0 ? `${bedrooms} bedroom${bedrooms === 1 ? "" : "s"} and ` : ""}${bathrooms} bathroom${bathrooms === 1 ? "" : "s"}.`
+      `This ${descriptor} is ${verb} in ${areaName}, ${town}. It has ${bedrooms > 0 ? `${bedrooms} bedroom${bedrooms === 1 ? "" : "s"} and ` : ""}${bathrooms} bathroom${bathrooms === 1 ? "" : "s"}.`
     );
     if (furnished) parts.push("Comes fully furnished, ready to move in.");
     if (amenities.length > 0) {

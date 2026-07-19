@@ -27,6 +27,11 @@ export default async function AdminLayout({
         <Button asChild variant="ghost" size="sm">
           <Link href="/admin/reports">Reports</Link>
         </Button>
+        {session.user.role === "ADMIN" && (
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/admin/media-requests">Pro Media</Link>
+          </Button>
+        )}
       </nav>
       {children}
     </div>
