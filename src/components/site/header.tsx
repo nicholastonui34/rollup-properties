@@ -54,6 +54,9 @@ export async function SiteHeader() {
                   <Link href="/unlocks">My unlocks</Link>
                 </Button>
               )}
+              <Button asChild variant="ghost" size="lg" className="hidden sm:inline-flex">
+                <Link href="/my-reports">My reports</Link>
+              </Button>
               <span className="hidden text-sm text-muted-foreground sm:inline">
                 Hi, <span className="font-medium text-foreground">{firstName}</span>
               </span>

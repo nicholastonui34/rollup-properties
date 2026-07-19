@@ -9,6 +9,8 @@ export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
   TOWNHOUSE: "Townhouse",
   COMMERCIAL: "Commercial",
   LAND: "Land",
+  HOSTEL: "Hostel",
+  SHARED_APARTMENT: "Shared apartment",
 };
 
 export const AMENITIES = [
@@ -23,6 +25,8 @@ export const AMENITIES = [
   "Fibre ready",
   "Balcony",
   "DSQ",
+  "Wi-Fi included",
+  "Flexible move-in",
 ] as const;
 
 export const MIN_LISTING_PHOTOS = 5;
@@ -79,10 +83,10 @@ export const REPORT_REASONS = [
 export const REPORT_AUTO_SUSPEND_THRESHOLD = 3;
 
 export const REPORT_STATUS_LABELS: Record<ReportStatus, string> = {
-  OPEN: "Open",
-  REVIEWED: "Reviewed",
-  DISMISSED: "Dismissed",
-  ACTIONED: "Actioned",
+  OPEN: "Reported",
+  INVESTIGATING: "Investigating",
+  REFUNDED: "Refunded",
+  REJECTED: "Rejected",
 };
 
 export const REPORT_STATUS_BADGE_VARIANT: Record<
@@ -90,7 +94,11 @@ export const REPORT_STATUS_BADGE_VARIANT: Record<
   "default" | "secondary" | "destructive" | "outline"
 > = {
   OPEN: "destructive",
-  REVIEWED: "secondary",
-  DISMISSED: "outline",
-  ACTIONED: "default",
+  INVESTIGATING: "secondary",
+  REFUNDED: "default",
+  REJECTED: "outline",
 };
+
+// Freshness staleness cue on listing cards/detail — amber past this many
+// days since last confirmation (half the admin 60-day re-verification flag).
+export const STALE_AFTER_DAYS = 45;

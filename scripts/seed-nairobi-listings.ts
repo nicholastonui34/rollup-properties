@@ -229,6 +229,7 @@ const CONDITION_SENTENCES = [
 const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
   BEDSITTER: "Bedsitter", STUDIO: "Studio", APARTMENT: "Apartment", MAISONETTE: "Maisonette",
   BUNGALOW: "Bungalow", TOWNHOUSE: "Townhouse", COMMERCIAL: "Commercial space", LAND: "Land",
+  HOSTEL: "Hostel", SHARED_APARTMENT: "Shared apartment",
 };
 
 function bedroomLabel(propertyType: PropertyType, bedrooms: number) {

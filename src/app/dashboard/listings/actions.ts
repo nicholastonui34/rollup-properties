@@ -25,6 +25,8 @@ const listingSchema = z.object({
     "TOWNHOUSE",
     "COMMERCIAL",
     "LAND",
+    "HOSTEL",
+    "SHARED_APARTMENT",
   ]),
   priceKes: z.coerce.number().int().positive("Enter a valid price"),
   depositKes: z.coerce.number().int().nonnegative().optional().or(z.nan().transform(() => undefined)),
@@ -49,6 +51,8 @@ const listingSchema = z.object({
   areaId: z.string().min(1, "Select an area"),
   estate: z.string().trim().optional(),
   streetAddress: z.string().trim().min(3, "Enter a street address or landmark"),
+  lat: z.coerce.number().min(-90).max(90).optional().or(z.nan().transform(() => undefined)),
+  lng: z.coerce.number().min(-180).max(180).optional().or(z.nan().transform(() => undefined)),
   bedrooms: z.coerce.number().int().min(0).max(20),
   bathrooms: z.coerce.number().int().min(0).max(20),
   furnished: z.coerce.boolean(),
@@ -78,6 +82,8 @@ function parseListingForm(formData: FormData) {
     areaId: formData.get("areaId"),
     estate: formData.get("estate"),
     streetAddress: formData.get("streetAddress"),
+    lat: formData.get("lat") || undefined,
+    lng: formData.get("lng") || undefined,
     bedrooms: formData.get("bedrooms") || 0,
     bathrooms: formData.get("bathrooms") || 0,
     furnished: formData.get("furnished") === "on" || formData.get("furnished") === "true",
@@ -132,6 +138,8 @@ export async function createListingAction(
         areaId: area.id,
         estate: parsed.data.estate || null,
         streetAddress: parsed.data.streetAddress,
+        lat: parsed.data.lat ?? null,
+        lng: parsed.data.lng ?? null,
         bedrooms: parsed.data.bedrooms,
         bathrooms: parsed.data.bathrooms,
         furnished: parsed.data.furnished,
@@ -186,6 +194,8 @@ export async function updateListingAction(
         areaId: area.id,
         estate: parsed.data.estate || null,
         streetAddress: parsed.data.streetAddress,
+        lat: parsed.data.lat ?? null,
+        lng: parsed.data.lng ?? null,
         bedrooms: parsed.data.bedrooms,
         bathrooms: parsed.data.bathrooms,
         furnished: parsed.data.furnished,
@@ -241,7 +251,10 @@ export async function renewListingAction(listingId: string) {
 
   await prisma.listing.update({
     where: { id: listingId },
-    data: { expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
+    data: {
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      lastConfirmedAt: new Date(),
+    },
   });
   revalidatePath("/dashboard");
 }

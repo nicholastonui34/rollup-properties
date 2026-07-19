@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { UNIVERSITIES } from "@/lib/universities";
 
 const slugify = (s: string) =>
   s
@@ -132,6 +133,30 @@ export default function Home() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Student Housing Hub */}
+      <section className="border-b border-border bg-background">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+            <Badge variant="secondary">Student Housing Hub</Badge>
+            <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              Verified housing near your campus
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Hostels, shared apartments and independent units within 10km of Nairobi&apos;s main
+              universities — same verification, same refund guarantee, just filtered to what
+              actually matters for students.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {UNIVERSITIES.map((u) => (
+                <Button key={u.slug} asChild variant="outline" size="sm">
+                  <Link href={`/search?purpose=RENT&university=${u.slug}`}>{u.name}</Link>
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

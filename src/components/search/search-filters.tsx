@@ -2,6 +2,7 @@ import { AMENITIES, PROPERTY_TYPE_LABELS } from "@/lib/listing-options";
 import type { ParsedFilters } from "@/lib/search";
 import { prisma } from "@/lib/prisma";
 import { AreaFilterFields } from "@/components/search/area-filter-fields";
+import { UNIVERSITIES } from "@/lib/universities";
 
 const BEDROOM_OPTIONS = [
   { value: "0", label: "Bedsitter / studio" },
@@ -125,6 +126,28 @@ export async function SearchFilters({ filters }: { filters: ParsedFilters }) {
             </option>
           ))}
         </select>
+      </div>
+
+      <div>
+        <label className={labelClass} htmlFor="f-university">
+          Near university (Student Housing Hub)
+        </label>
+        <select
+          id="f-university"
+          name="university"
+          defaultValue={filters.university ?? ""}
+          className={selectClass}
+        >
+          <option value="">Any location</option>
+          {UNIVERSITIES.map((u) => (
+            <option key={u.slug} value={u.slug}>
+              {u.name}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Only shows listings within 10km with a map pin set.
+        </p>
       </div>
 
       <label className="flex items-center gap-2 text-sm text-foreground">

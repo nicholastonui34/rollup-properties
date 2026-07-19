@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,15 @@ import {
 import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
 import { AMENITIES, PROPERTY_TYPE_LABELS } from "@/lib/listing-options";
 import type { ListingFormState } from "@/app/dashboard/listings/actions";
+
+const MapPicker = dynamic(() => import("./map-picker").then((m) => m.MapPicker), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+      Loading map…
+    </div>
+  ),
+});
 
 type Area = { id: string; name: string; town: string };
 type PropertyType = keyof typeof PROPERTY_TYPE_LABELS;
@@ -33,6 +43,8 @@ type ExistingListing = {
   areaId: string | null;
   estate: string | null;
   streetAddress: string;
+  lat: number | null;
+  lng: number | null;
   bedrooms: number;
   bathrooms: number;
   furnished: boolean;
@@ -58,6 +70,8 @@ export function ListingForm({
   const [propertyType, setPropertyType] = useState<PropertyType>(listing?.propertyType ?? "APARTMENT");
   const [areaId, setAreaId] = useState(listing?.areaId ?? "");
   const [amenities, setAmenities] = useState<string[]>(listing?.amenities ?? []);
+  const [lat, setLat] = useState<number | null>(listing?.lat ?? null);
+  const [lng, setLng] = useState<number | null>(listing?.lng ?? null);
 
   const areaOptions: ComboboxOption[] = areas.map((a) => ({
     value: a.id,
@@ -74,6 +88,8 @@ export function ListingForm({
       <input type="hidden" name="purpose" value={purpose} />
       <input type="hidden" name="propertyType" value={propertyType} />
       <input type="hidden" name="areaId" value={areaId} />
+      {lat != null && <input type="hidden" name="lat" value={lat} />}
+      {lng != null && <input type="hidden" name="lng" value={lng} />}
       {amenities.map((a) => (
         <input key={a} type="hidden" name="amenities" value={a} />
       ))}
@@ -153,6 +169,24 @@ export function ListingForm({
               required
             />
           </div>
+        </div>
+        <div className="space-y-2">
+          <Label>Map pin (optional)</Label>
+          <p className="text-xs text-muted-foreground">
+            Click the map to drop a pin at the property. Add one to appear in map search and
+            Student Housing results.
+          </p>
+          <div className="h-64 w-full overflow-hidden rounded-xl border border-border">
+            <MapPicker lat={lat} lng={lng} onChange={(newLat, newLng) => { setLat(newLat); setLng(newLng); }} />
+          </div>
+          {lat != null && lng != null && (
+            <p className="text-xs text-muted-foreground">
+              Pin set at {lat.toFixed(5)}, {lng.toFixed(5)}.{" "}
+              <button type="button" className="underline underline-offset-2" onClick={() => { setLat(null); setLng(null); }}>
+                Clear
+              </button>
+            </p>
+          )}
         </div>
       </section>
 

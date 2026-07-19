@@ -7,7 +7,8 @@ import { PROPERTY_TYPE_LABELS, listingStatusLabel } from "@/lib/listing-options"
 import type { ListingCardData } from "@/lib/search";
 import { toggleFavoriteAction } from "@/app/favorites/actions";
 import { FavoriteButton } from "@/components/listing/favorite-button";
-import { isPast } from "@/lib/dates";
+import { isPast, daysSince } from "@/lib/dates";
+import { STALE_AFTER_DAYS } from "@/lib/listing-options";
 
 export function ListingCard({
   listing,
@@ -22,6 +23,9 @@ export function ListingCard({
   const location = listing.area?.name ?? listing.estate ?? listing.town;
   const isVerified = Boolean(listing.verifiedAt);
   const isFeatured = Boolean(listing.featuredUntil && !isPast(listing.featuredUntil));
+  const confirmedDate = listing.lastConfirmedAt ?? listing.verifiedAt;
+  const confirmedDaysAgo = confirmedDate ? daysSince(confirmedDate) : null;
+  const isStale = confirmedDaysAgo != null && confirmedDaysAgo > STALE_AFTER_DAYS;
 
   return (
     <Card className="overflow-hidden py-0 transition-shadow hover:shadow-md">
@@ -80,6 +84,11 @@ export function ListingCard({
             <MapPin className="size-3.5 shrink-0" />
             {location}, {listing.town}
           </p>
+          {confirmedDaysAgo != null && (
+            <p className={`text-xs ${isStale ? "text-amber-600 dark:text-amber-500" : "text-muted-foreground"}`}>
+              {confirmedDaysAgo === 0 ? "Confirmed today" : `Confirmed ${confirmedDaysAgo}d ago`}
+            </p>
+          )}
           <div className="flex items-center gap-3 pt-1 text-xs text-muted-foreground">
             <span>{PROPERTY_TYPE_LABELS[listing.propertyType]}</span>
             {listing.bedrooms > 0 && (

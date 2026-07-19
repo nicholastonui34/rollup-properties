@@ -4,9 +4,10 @@ import Link from "next/link";
 import { LayoutGrid, Map as MapIcon } from "lucide-react";
 import type { ParsedFilters, RawSearchParams } from "@/lib/search";
 
+// "newest" now leads with verified/recently-confirmed listings by default
+// (src/lib/search.ts orderBy()), so there's no separate opt-in sort for it.
 const SORT_OPTIONS: { value: string; label: string }[] = [
   { value: "newest", label: "Newest" },
-  { value: "verified", label: "Recently verified" },
   { value: "price_asc", label: "Price: low to high" },
   { value: "price_desc", label: "Price: high to low" },
 ];

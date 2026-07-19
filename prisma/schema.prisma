@@ -29,6 +29,8 @@ enum PropertyType {
   TOWNHOUSE
   COMMERCIAL
   LAND
+  HOSTEL
+  SHARED_APARTMENT
 }
 
 enum ListingStatus {
@@ -71,9 +73,9 @@ enum PaymentPurpose {
 
 enum ReportStatus {
   OPEN
-  REVIEWED
-  DISMISSED
-  ACTIONED
+  INVESTIGATING
+  REFUNDED
+  REJECTED
 }
 
 // Schema-only for now (spec §8): no billing/enforcement wired up, just the
@@ -150,6 +152,7 @@ model Listing {
   status           ListingStatus  @default(DRAFT)
   verifiedAt       DateTime?
   verifiedById     String?
+  lastConfirmedAt  DateTime?
   expiresAt        DateTime?
   featuredUntil    DateTime?
   viewCount        Int            @default(0)
@@ -200,6 +203,8 @@ model Unlock {
   payment   Payment? @relation(fields: [paymentId], references: [id])
   createdAt DateTime @default(now())
 
+  report Report?
+
   @@unique([userId, listingId])
 }
 
@@ -248,13 +253,17 @@ model SavedSearch {
 }
 
 model Report {
-  id         String       @id @default(cuid())
-  listingId  String
-  listing    Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  reporterId String
-  reporter   User         @relation(fields: [reporterId], references: [id])
-  reason     String
-  details    String?
-  status     ReportStatus @default(OPEN)
-  createdAt  DateTime     @default(now())
+  id             String       @id @default(cuid())
+  listingId      String
+  listing        Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  reporterId     String
+  reporter       User         @relation(fields: [reporterId], references: [id])
+  unlockId       String?      @unique
+  unlock         Unlock?      @relation(fields: [unlockId], references: [id])
+  reason         String
+  details        String?
+  status         ReportStatus @default(OPEN)
+  resolutionNote String?
+  resolvedAt     DateTime?
+  createdAt      DateTime     @default(now())
 }

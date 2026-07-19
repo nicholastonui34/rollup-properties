@@ -53,6 +53,7 @@ async function recordDecision(
               status: "LIVE",
               verifiedAt: new Date(),
               verifiedById: verifier.id,
+              lastConfirmedAt: new Date(),
               expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
             }
           : { status },

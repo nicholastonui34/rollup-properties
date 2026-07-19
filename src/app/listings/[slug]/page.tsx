@@ -6,11 +6,12 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PROPERTY_TYPE_LABELS, UNLOCK_PRICE_KES, listingStatusLabel } from "@/lib/listing-options";
+import { PROPERTY_TYPE_LABELS, UNLOCK_PRICE_KES, STALE_AFTER_DAYS, listingStatusLabel } from "@/lib/listing-options";
 import { displayPhone } from "@/lib/phone";
+import { daysSince } from "@/lib/dates";
 import { SITE_URL } from "@/lib/site";
 import { initiateUnlockAction } from "./unlock-actions";
-import { UnlockButton } from "@/components/listing/unlock-button";
+import { UnlockDialog } from "@/components/listing/unlock-dialog";
 import { FavoriteButton } from "@/components/listing/favorite-button";
 import { ReportButton } from "@/components/listing/report-button";
 import { toggleFavoriteAction } from "@/app/favorites/actions";
@@ -82,6 +83,9 @@ export default async function ListingDetailPage({
   const cover = listing.images.find((i) => i.isCover) ?? listing.images[0];
   const gallery = listing.images.filter((i) => i.id !== cover?.id);
   const isVerified = Boolean(listing.verifiedAt);
+  const confirmedDate = listing.lastConfirmedAt ?? listing.verifiedAt;
+  const confirmedDaysAgo = confirmedDate ? daysSince(confirmedDate) : null;
+  const isStale = confirmedDaysAgo != null && confirmedDaysAgo > STALE_AFTER_DAYS;
 
   const jsonLd =
     listing.status === "LIVE"
@@ -149,7 +153,10 @@ export default async function ListingDetailPage({
       )}
       {reported === "1" && (
         <div className="mb-6 rounded-lg bg-secondary px-4 py-2 text-sm text-secondary-foreground">
-          Thanks — we&apos;ve flagged this listing for review.
+          Thanks — we&apos;ve flagged this listing for review.{" "}
+          <Link href="/my-reports" className="font-medium underline underline-offset-2">
+            Track your report
+          </Link>
         </div>
       )}
 
@@ -229,7 +236,13 @@ export default async function ListingDetailPage({
                   >
                     Verified {listing.verifiedAt!.toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
                   </Badge>
-                ) : (
+                ) : null}
+                {isVerified && confirmedDaysAgo != null && (
+                  <span className={`text-xs ${isStale ? "text-amber-600 dark:text-amber-500" : "text-muted-foreground"}`}>
+                    {confirmedDaysAgo === 0 ? "Confirmed today" : `Confirmed ${confirmedDaysAgo}d ago`}
+                  </span>
+                )}
+                {!isVerified && (
                   <Badge
                     variant="outline"
                     title="This listing hasn't completed Rollup's photo, address and ownership check yet."
@@ -338,9 +351,13 @@ export default async function ListingDetailPage({
                     Pay a small one-time fee to reveal the direct phone number — no broker
                     fees.
                   </p>
-                  <form action={initiateUnlockAction.bind(null, listing.id)}>
-                    <UnlockButton priceKes={UNLOCK_PRICE_KES} />
-                  </form>
+                  <UnlockDialog
+                    action={initiateUnlockAction.bind(null, listing.id)}
+                    priceKes={UNLOCK_PRICE_KES}
+                    verifiedDateLabel={listing.verifiedAt!.toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
+                    confirmedDaysAgo={confirmedDaysAgo}
+                    isStale={isStale}
+                  />
                 </>
               ) : (
                 <>

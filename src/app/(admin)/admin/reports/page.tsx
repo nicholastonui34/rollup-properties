@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ConfirmSubmitButton } from "@/components/listing/confirm-submit-button";
+import { ResolutionNoteButton } from "@/components/admin/resolution-note-button";
 import { REPORT_STATUS_BADGE_VARIANT, REPORT_STATUS_LABELS } from "@/lib/listing-options";
-import { dismissReportAction, actionReportAction, reinstateListingAction } from "./actions";
+import { startInvestigatingAction, refundAndBanAction, rejectReportAction, reinstateListingAction } from "./actions";
 
 export const metadata: Metadata = { title: "Reports" };
 
@@ -13,6 +13,7 @@ export default async function AdminReportsPage() {
     include: {
       listing: { select: { id: true, title: true, slug: true, status: true } },
       reporter: { select: { name: true, phone: true } },
+      unlock: { include: { payment: { select: { amountKes: true, status: true } } } },
     },
     orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     take: 200,
@@ -32,7 +33,9 @@ export default async function AdminReportsPage() {
           Reports
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Listings flagged by seekers. 3+ open reports auto-suspend a listing.
+          Listings flagged by seekers. 3+ open reports auto-suspend a listing. Confirming a report
+          as fake refunds the reporter&apos;s unlock (if any), suspends the listing, and bans the
+          lister.
         </p>
       </div>
 
@@ -54,6 +57,13 @@ export default async function AdminReportsPage() {
                       {REPORT_STATUS_LABELS[r.status]}
                     </Badge>
                     {r.listing.status === "SUSPENDED" && <Badge variant="destructive">Listing suspended</Badge>}
+                    {r.unlock?.payment ? (
+                      <span className="text-xs text-muted-foreground">
+                        Paid KES {r.unlock.payment.amountKes} ({r.unlock.payment.status.toLowerCase()})
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">No payment to refund</span>
+                    )}
                     {(openCountByListing.get(r.listingId) ?? 0) > 1 && r.status === "OPEN" && (
                       <span className="text-xs text-muted-foreground">
                         {openCountByListing.get(r.listingId)} open reports on this listing
@@ -66,25 +76,36 @@ export default async function AdminReportsPage() {
                     Reported by {r.reporter.name} ({r.reporter.phone}) ·{" "}
                     {r.createdAt.toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
                   </p>
+                  {r.resolutionNote && (
+                    <p className="mt-1 text-xs text-muted-foreground">Resolution: {r.resolutionNote}</p>
+                  )}
                 </div>
 
                 <div className="flex shrink-0 flex-wrap gap-2">
                   {r.status === "OPEN" && (
+                    <form action={startInvestigatingAction.bind(null, r.id)}>
+                      <Button type="submit" size="sm" variant="outline">
+                        Start investigating
+                      </Button>
+                    </form>
+                  )}
+                  {(r.status === "OPEN" || r.status === "INVESTIGATING") && (
                     <>
-                      <form action={dismissReportAction.bind(null, r.id)}>
-                        <Button type="submit" size="sm" variant="outline">
-                          Dismiss
-                        </Button>
-                      </form>
-                      <form action={actionReportAction.bind(null, r.id)}>
-                        <ConfirmSubmitButton
-                          type="submit"
-                          size="sm"
+                      <form action={refundAndBanAction.bind(null, r.id)}>
+                        <ResolutionNoteButton
+                          label={r.unlock ? "Confirm fake — refund & ban" : "Confirm fake — suspend & ban"}
+                          confirmLabel="Confirm"
+                          placeholder="Why is this confirmed fake?"
                           variant="destructive"
-                          confirmMessage="Suspend this listing and mark the report actioned?"
-                        >
-                          Suspend listing
-                        </ConfirmSubmitButton>
+                        />
+                      </form>
+                      <form action={rejectReportAction.bind(null, r.id)}>
+                        <ResolutionNoteButton
+                          label="Reject — listing is legitimate"
+                          confirmLabel="Confirm"
+                          placeholder="Why is this being rejected?"
+                          variant="outline"
+                        />
                       </form>
                     </>
                   )}

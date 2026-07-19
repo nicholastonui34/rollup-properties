@@ -72,6 +72,9 @@ export function MobileNav({
                     My unlocks
                   </Link>
                 )}
+                <Link href="/my-reports" onClick={close} className="rounded-lg px-3 py-3 text-base font-medium text-foreground hover:bg-muted">
+                  My reports
+                </Link>
                 <div className="my-2 border-t border-border" />
                 <p className="px-3 text-sm text-muted-foreground">
                   Signed in as <span className="font-medium text-foreground">{session.firstName}</span>

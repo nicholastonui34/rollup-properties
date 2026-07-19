@@ -98,6 +98,8 @@ export default async function EditListingPage({
             areaId: listing.areaId,
             estate: listing.estate,
             streetAddress: listing.streetAddress,
+            lat: listing.lat,
+            lng: listing.lng,
             bedrooms: listing.bedrooms,
             bathrooms: listing.bathrooms,
             furnished: listing.furnished,

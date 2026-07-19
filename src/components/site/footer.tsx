@@ -1,14 +1,31 @@
 import Link from "next/link";
 import { Logo } from "@/components/site/logo";
+import { prisma } from "@/lib/prisma";
 
-const exploreLinks = [
-  { href: "/search?purpose=RENT&town=Nairobi", label: "Rentals in Nairobi" },
-  { href: "/search?purpose=SALE&town=Nairobi", label: "Homes for sale in Nairobi" },
-  { href: "/search?purpose=RENT&town=Mombasa", label: "Rentals in Mombasa" },
-  { href: "/search?purpose=RENT&town=Kisumu", label: "Rentals in Kisumu" },
-];
+const MAX_EXPLORE_LINKS = 4;
 
-export function SiteFooter() {
+// Only link to (town, purpose) pairs with real LIVE inventory — a footer
+// link into an empty results page is exactly the trust bug this fixes
+// (Mombasa/Kisumu links used to be hardcoded here with zero listings behind
+// them). Recomputed on every render so new towns show up automatically as
+// they get real coverage.
+async function getExploreLinks() {
+  const rows = await prisma.listing.groupBy({
+    by: ["town", "purpose"],
+    where: { status: "LIVE" },
+    _count: { town: true },
+    orderBy: { _count: { town: "desc" } },
+    take: MAX_EXPLORE_LINKS,
+  });
+
+  return rows.map((r) => ({
+    href: `/search?purpose=${r.purpose}&town=${encodeURIComponent(r.town)}`,
+    label: r.purpose === "RENT" ? `Rentals in ${r.town}` : `Homes for sale in ${r.town}`,
+  }));
+}
+
+export async function SiteFooter() {
+  const exploreLinks = await getExploreLinks();
   return (
     <footer className="border-t border-border bg-secondary/50">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-3">
@@ -20,7 +37,7 @@ export function SiteFooter() {
           </p>
         </div>
 
-        <div>
+        <div className={exploreLinks.length === 0 ? "hidden" : ""}>
           <h3 className="mb-3 text-sm font-semibold text-foreground">Explore</h3>
           <ul className="space-y-2 text-sm">
             {exploreLinks.map((l) => (

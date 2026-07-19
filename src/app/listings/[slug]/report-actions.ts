@@ -21,10 +21,21 @@ export async function reportListingAction(listingId: string, formData: FormData)
   const listing = await prisma.listing.findUnique({ where: { id: listingId } });
   if (!listing) throw new Error("Listing not found");
 
+  // Auto-attach the reporter's own unlock (if any) so a confirmed-fake
+  // resolution can refund the exact payment this report is about. `unlockId`
+  // is unique on Report, so only attach it if it isn't already claimed by an
+  // earlier report (e.g. a re-report after a REJECTED resolution).
+  const unlock = await prisma.unlock.findUnique({
+    where: { userId_listingId: { userId: session.user.id, listingId } },
+    include: { report: true },
+  });
+  const unlockId = unlock && !unlock.report ? unlock.id : undefined;
+
   await prisma.report.create({
     data: {
       listingId,
       reporterId: session.user.id,
+      unlockId,
       reason,
       details: details || null,
     },

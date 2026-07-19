@@ -1,9 +1,11 @@
 import type { ListingPurpose, Prisma, PropertyType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { findUniversity, CAMPUS_RADIUS_KM } from "@/lib/universities";
+import { distanceKm, KM_PER_DEGREE_LAT } from "@/lib/distance";
 
 export const PAGE_SIZE = 20;
 
-export type SortKey = "newest" | "price_asc" | "price_desc" | "verified";
+export type SortKey = "newest" | "price_asc" | "price_desc";
 
 export type RawSearchParams = { [key: string]: string | string[] | undefined };
 
@@ -28,6 +30,7 @@ export interface ParsedFilters {
   furnished: boolean;
   amenities: string[];
   includeTaken: boolean;
+  university?: string;
   sort: SortKey;
   page: number;
   view: "grid" | "map";
@@ -38,8 +41,7 @@ export function parseFilters(params: RawSearchParams): ParsedFilters {
   const purpose = purposeRaw === "RENT" || purposeRaw === "SALE" ? purposeRaw : undefined;
 
   const sortRaw = first(params.sort);
-  const sort: SortKey =
-    sortRaw === "price_asc" || sortRaw === "price_desc" || sortRaw === "verified" ? sortRaw : "newest";
+  const sort: SortKey = sortRaw === "price_asc" || sortRaw === "price_desc" ? sortRaw : "newest";
 
   const viewRaw = first(params.view);
   const view = viewRaw === "map" ? "map" : "grid";
@@ -63,6 +65,7 @@ export function parseFilters(params: RawSearchParams): ParsedFilters {
     furnished: first(params.furnished) === "1",
     amenities: list(params.amenities).filter(Boolean),
     includeTaken: first(params.includeTaken) === "1",
+    university: findUniversity(first(params.university))?.slug,
     sort,
     page,
     view,
@@ -118,16 +121,18 @@ const FEATURED_FIRST: Prisma.ListingOrderByWithRelationInput = {
   featuredUntil: { sort: "desc", nulls: "last" },
 };
 
+// Verified listings lead by default (not just under an opt-in toggle) so
+// unverified/ghost listings don't outrank trustworthy ones just for being
+// newer — the buried-good-listings problem the ranking exists to solve.
 function orderBy(sort: SortKey): Prisma.ListingOrderByWithRelationInput[] {
+  const verifiedFirst: Prisma.ListingOrderByWithRelationInput = { verifiedAt: { sort: "desc", nulls: "last" } };
   switch (sort) {
     case "price_asc":
       return [FEATURED_FIRST, { priceKes: "asc" }];
     case "price_desc":
       return [FEATURED_FIRST, { priceKes: "desc" }];
-    case "verified":
-      return [FEATURED_FIRST, { verifiedAt: "desc" }, { createdAt: "desc" }];
     default:
-      return [FEATURED_FIRST, { createdAt: "desc" }];
+      return [FEATURED_FIRST, verifiedFirst, { createdAt: "desc" }];
   }
 }
 
@@ -146,6 +151,7 @@ export const LISTING_CARD_SELECT = {
   lat: true,
   lng: true,
   verifiedAt: true,
+  lastConfirmedAt: true,
   featuredUntil: true,
   area: { select: { name: true, town: true } },
   images: { where: { isCover: true }, take: 1, select: { url: true } },
@@ -154,6 +160,10 @@ export const LISTING_CARD_SELECT = {
 export type ListingCardData = Prisma.ListingGetPayload<{ select: typeof LISTING_CARD_SELECT }>;
 
 export async function searchListings(filters: ParsedFilters) {
+  if (filters.university) {
+    return searchNearCampus(filters, filters.university);
+  }
+
   const where = buildWhere(filters);
   const skip = (filters.page - 1) * PAGE_SIZE;
 
@@ -167,6 +177,37 @@ export async function searchListings(filters: ParsedFilters) {
     }),
     prisma.listing.count({ where }),
   ]);
+
+  return { listings, total, pageCount: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
+}
+
+// Student Housing Hub: a bounding-box Prisma prefilter, then exact haversine
+// distance + sort in JS — no PostGIS in this stack, and candidate counts at
+// this scale are small enough for this to be cheap (documented
+// simplification, see plan). Distance sorting replaces the normal
+// FEATURED_FIRST/verified ordering here since proximity is the point.
+async function searchNearCampus(filters: ParsedFilters, universitySlug: string) {
+  const campus = findUniversity(universitySlug)!;
+  const latDelta = CAMPUS_RADIUS_KM / KM_PER_DEGREE_LAT;
+  const lngDelta = CAMPUS_RADIUS_KM / (KM_PER_DEGREE_LAT * Math.cos((campus.lat * Math.PI) / 180));
+
+  const where: Prisma.ListingWhereInput = {
+    ...buildWhere(filters),
+    lat: { gte: campus.lat - latDelta, lte: campus.lat + latDelta },
+    lng: { gte: campus.lng - lngDelta, lte: campus.lng + lngDelta },
+  };
+
+  const candidates = await prisma.listing.findMany({ where, select: LISTING_CARD_SELECT, take: 500 });
+
+  const withDistance = candidates
+    .filter((l): l is typeof l & { lat: number; lng: number } => l.lat != null && l.lng != null)
+    .map((l) => ({ listing: l, distanceKm: distanceKm(l.lat, l.lng, campus.lat, campus.lng) }))
+    .filter((c) => c.distanceKm <= CAMPUS_RADIUS_KM)
+    .sort((a, b) => a.distanceKm - b.distanceKm);
+
+  const total = withDistance.length;
+  const skip = (filters.page - 1) * PAGE_SIZE;
+  const listings = withDistance.slice(skip, skip + PAGE_SIZE).map((c) => c.listing);
 
   return { listings, total, pageCount: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
 }
