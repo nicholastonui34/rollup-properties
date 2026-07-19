@@ -379,7 +379,13 @@ export default async function ListingDetailPage({
           </div>
 
           {!isOwner && listing.status === "LIVE" && (
-            <BookTourDialog listingId={listing.id} className="hidden w-full sm:flex" />
+            hasAccess ? (
+              <BookTourDialog listingId={listing.id} className="hidden w-full sm:flex" />
+            ) : (
+              <Button asChild variant="outline" size="lg" className="hidden w-full sm:flex">
+                <a href="#contact-card">Unlock contact to book a tour</a>
+              </Button>
+            )
           )}
 
           {isOwner && (
@@ -401,7 +407,13 @@ export default async function ListingDetailPage({
 
       {!isOwner && listing.status === "LIVE" && (
         <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-border bg-background p-3 shadow-lg sm:hidden">
-          <BookTourDialog listingId={listing.id} className="flex-1" />
+          {hasAccess ? (
+            <BookTourDialog listingId={listing.id} className="flex-1" />
+          ) : (
+            <Button asChild size="lg" variant="outline" className="flex-1">
+              <a href="#contact-card">Book a Tour</a>
+            </Button>
+          )}
           <Button asChild size="lg" className="flex-1">
             <a href="#contact-card">Contact</a>
           </Button>

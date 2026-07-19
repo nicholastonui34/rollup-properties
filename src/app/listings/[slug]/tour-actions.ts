@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { z } from "zod";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { normalizeKenyanPhone, displayPhone } from "@/lib/phone";
@@ -46,6 +47,34 @@ export async function submitTourRequestAction(
     return { success: true };
   }
 
+  // Booking a tour requires having already paid to unlock this listing's
+  // contact — enforced server-side (not just hiding the button) since a
+  // form action can be called directly. ADMIN can always book (matches the
+  // admin contact-card bypass elsewhere on the listing page).
+  const session = await auth();
+  if (!session?.user) {
+    return { error: "Log in and unlock this listing's contact before booking a tour." };
+  }
+
+  const listing = await prisma.listing.findUnique({
+    where: { id: listingId },
+    include: { lister: { select: { name: true, email: true } } },
+  });
+  if (!listing || listing.status !== "LIVE") {
+    return { error: "This listing isn't accepting tour requests right now." };
+  }
+  if (listing.listerId === session.user.id) {
+    return { error: "You can't book a tour on your own listing." };
+  }
+  if (session.user.role !== "ADMIN") {
+    const unlock = await prisma.unlock.findUnique({
+      where: { userId_listingId: { userId: session.user.id, listingId } },
+    });
+    if (!unlock) {
+      return { error: "Unlock this listing's contact before booking a tour." };
+    }
+  }
+
   const h = await headers();
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (!checkRateLimit(`tour-ip:${ip}`, 5, 60 * 60 * 1000)) {
@@ -77,14 +106,6 @@ export async function submitTourRequestAction(
   const maxDate = new Date(startOfToday.getTime() + 14 * 24 * 60 * 60 * 1000);
   if (Number.isNaN(preferredDate.getTime()) || preferredDate < startOfToday || preferredDate > maxDate) {
     return { error: "Choose a date within the next 14 days" };
-  }
-
-  const listing = await prisma.listing.findUnique({
-    where: { id: listingId },
-    include: { lister: { select: { name: true, email: true } } },
-  });
-  if (!listing || listing.status !== "LIVE") {
-    return { error: "This listing isn't accepting tour requests right now." };
   }
 
   await prisma.tourRequest.create({
