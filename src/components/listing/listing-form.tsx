@@ -8,12 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
 import { AMENITIES, PROPERTY_TYPE_LABELS } from "@/lib/listing-options";
 import type { ListingFormState } from "@/app/dashboard/listings/actions";
 
@@ -60,10 +59,11 @@ export function ListingForm({
   const [areaId, setAreaId] = useState(listing?.areaId ?? "");
   const [amenities, setAmenities] = useState<string[]>(listing?.amenities ?? []);
 
-  const areasByTown = areas.reduce<Record<string, Area[]>>((acc, a) => {
-    (acc[a.town] ??= []).push(a);
-    return acc;
-  }, {});
+  const areaOptions: ComboboxOption[] = areas.map((a) => ({
+    value: a.id,
+    label: a.name,
+    group: a.town,
+  }));
 
   function toggleAmenity(a: string) {
     setAmenities((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]));
@@ -130,19 +130,13 @@ export function ListingForm({
         <h2 className="text-sm font-semibold text-foreground">Location</h2>
         <div className="space-y-2">
           <Label>Area</Label>
-          <Select value={areaId} onValueChange={setAreaId}>
-            <SelectTrigger className="w-full"><SelectValue placeholder="Select an area" /></SelectTrigger>
-            <SelectContent>
-              {Object.entries(areasByTown).map(([town, list]) => (
-                <SelectGroup key={town}>
-                  <SelectLabel>{town}</SelectLabel>
-                  {list.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-                  ))}
-                </SelectGroup>
-              ))}
-            </SelectContent>
-          </Select>
+          <Combobox
+            options={areaOptions}
+            value={areaId}
+            onValueChange={setAreaId}
+            placeholder="Select an area"
+            searchPlaceholder="Search areas…"
+          />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">

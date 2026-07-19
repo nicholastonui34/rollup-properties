@@ -1,6 +1,7 @@
 import { AMENITIES, PROPERTY_TYPE_LABELS } from "@/lib/listing-options";
 import type { ParsedFilters } from "@/lib/search";
 import { prisma } from "@/lib/prisma";
+import { AreaFilterFields } from "@/components/search/area-filter-fields";
 
 const BEDROOM_OPTIONS = [
   { value: "0", label: "Bedsitter / studio" },
@@ -22,13 +23,6 @@ export async function SearchFilters({ filters }: { filters: ParsedFilters }) {
     orderBy: [{ town: "asc" }, { name: "asc" }],
     select: { slug: true, name: true, town: true },
   });
-
-  const areasByTown = new Map<string, typeof areas>();
-  for (const area of areas) {
-    const bucket = areasByTown.get(area.town) ?? [];
-    bucket.push(area);
-    areasByTown.set(area.town, bucket);
-  }
 
   return (
     <form method="GET" action="/search" className="space-y-5 rounded-xl border bg-card p-4">
@@ -60,38 +54,11 @@ export async function SearchFilters({ filters }: { filters: ParsedFilters }) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className={labelClass} htmlFor="f-town">
-            Town
-          </label>
-          <select id="f-town" name="town" defaultValue={filters.town ?? ""} className={selectClass}>
-            <option value="">Any town</option>
-            {[...areasByTown.keys()].map((town) => (
-              <option key={town} value={town}>
-                {town}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className={labelClass} htmlFor="f-area">
-            Area
-          </label>
-          <select id="f-area" name="area" defaultValue={filters.areaSlug ?? ""} className={selectClass}>
-            <option value="">Any area</option>
-            {[...areasByTown.entries()].map(([town, list]) => (
-              <optgroup key={town} label={town}>
-                {list.map((area) => (
-                  <option key={area.slug} value={area.slug}>
-                    {area.name}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </div>
-      </div>
+      <AreaFilterFields
+        areas={areas}
+        initialTown={filters.town ?? ""}
+        initialAreaSlug={filters.areaSlug ?? ""}
+      />
 
       <div className="grid grid-cols-2 gap-3">
         <div>
