@@ -60,7 +60,7 @@ export function BoostListingDialog({
             <DialogHeader>
               <DialogTitle>Boost your listing</DialogTitle>
               <DialogDescription>
-                Professional photos, video and 3D tours from Rollup&apos;s Pro Media team. Pricing from KES — (final
+                Professional photos, video and 3D tours from Nyoomba&apos;s Pro Media team. Pricing from KES — (final
                 quote after we review your request).
               </DialogDescription>
             </DialogHeader>

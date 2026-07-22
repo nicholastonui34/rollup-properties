@@ -15,7 +15,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
       {
         question: "How does the verified badge work?",
         answer:
-          "Before a listing goes live, a Rollup verifier confirms the photos, address and ownership or management rights in person or via documentation. The badge shows the date it was last confirmed, so you know how fresh that check is.",
+          "Before a listing goes live, a Nyoomba verifier confirms the photos, address and ownership or management rights in person or via documentation. The badge shows the date it was last confirmed, so you know how fresh that check is.",
       },
       {
         question: "Why do I have to pay to see the contact?",
@@ -40,7 +40,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
       {
         question: "What is the Student Housing Hub?",
         answer:
-          "A filtered view of Rollup listings — hostels, shared apartments and independent units — within reach of Nairobi's main universities, with the same verification and refund guarantee as every other listing.",
+          "A filtered view of Nyoomba listings — hostels, shared apartments and independent units — within reach of Nairobi's main universities, with the same verification and refund guarantee as every other listing.",
       },
       {
         question: "Can I filter by university?",
@@ -65,7 +65,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
       {
         question: "What is Pro Media?",
         answer:
-          "Rollup's in-house team offers professional photography, video tours and 3D/virtual tours to help your listing stand out. Request it from your dashboard — pricing is quoted after we review your request.",
+          "Nyoomba's in-house team offers professional photography, video tours and 3D/virtual tours to help your listing stand out. Request it from your dashboard — pricing is quoted after we review your request.",
       },
       {
         question: "Can I add my agency's website?",

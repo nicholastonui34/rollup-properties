@@ -29,7 +29,7 @@ export async function initiateUnlockAction(listingId: string) {
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
   if (!user) redirect("/login");
 
-  const email = user.email ?? `${user.phone.replace("+", "")}@rollupproperties.co.ke`;
+  const email = user.email ?? `${user.phone.replace("+", "")}@nyoomba.co.ke`;
   const reference = `unlock_${crypto.randomBytes(10).toString("hex")}`;
 
   const payment = await prisma.payment.create({

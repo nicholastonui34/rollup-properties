@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { PROPERTY_TYPE_LABELS } from "@/lib/listing-options";
 import { normalizeListingTitle } from "@/lib/listing-title";
 
-export const alt = "Listing on Rollup Properties";
+export const alt = "Listing on Nyoomba";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -116,7 +116,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               maxWidth: 1000,
             }}
           >
-            {title ?? "Verified property on Rollup"}
+            {title ?? "Verified property on Nyoomba"}
           </span>
           {location && (
             <span style={{ fontSize: 28, color: "#dbe6e0", marginTop: 12 }}>{location}</span>

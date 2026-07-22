@@ -4,7 +4,7 @@ import { NEWS_ARTICLES } from "@/lib/news";
 
 export const metadata: Metadata = {
   title: "News",
-  description: "Updates and articles from Rollup Properties.",
+  description: "Updates and articles from Nyoomba.",
 };
 
 export default function NewsPage() {
@@ -15,7 +15,7 @@ export default function NewsPage() {
       <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
         News
       </h1>
-      <p className="mt-2 text-sm text-muted-foreground">Updates and articles from the Rollup team.</p>
+      <p className="mt-2 text-sm text-muted-foreground">Updates and articles from the Nyoomba team.</p>
 
       <div className="mt-8 space-y-6">
         {articles.map((article) => (

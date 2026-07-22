@@ -6,14 +6,14 @@ import { ApplicationForm } from "@/components/careers/application-form";
 
 export const metadata: Metadata = {
   title: "Careers",
-  description: "Join Rollup Properties — help build a verified, broker-free housing market in Kenya.",
+  description: "Join Nyoomba — help build a verified, broker-free housing market in Kenya.",
 };
 
 export default function CareersPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
       <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-        Careers at Rollup
+        Careers at Nyoomba
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
         We&apos;re building a housing market Kenyans can trust — verified listings, direct contact

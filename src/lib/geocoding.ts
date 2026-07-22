@@ -3,7 +3,7 @@
 // Nominatim's usage policy requires an identifying User-Agent and caps bulk
 // requests at ~1/sec — respected here and by the backfill script that calls this.
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
-const USER_AGENT = "RollupProperties/1.0 (+https://rollup-properties.vercel.app; nicholastonui34@gmail.com)";
+const USER_AGENT = "Nyoomba/1.0 (+https://nyoomba.vercel.app; nicholastonui34@gmail.com)";
 
 export async function geocodeAddress(parts: {
   streetAddress: string;

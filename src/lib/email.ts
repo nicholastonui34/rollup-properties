@@ -1,4 +1,4 @@
-const FROM = process.env.EMAIL_FROM ?? "Rollup Properties <alerts@rollupproperties.co.ke>";
+const FROM = process.env.EMAIL_FROM ?? "Nyoomba <alerts@nyoomba.co.ke>";
 
 // No SMS/email provider keys exist yet (BRIEF.md §4.1 "email first, SMS later").
 // Same graceful-degrade shape as Paystack: without RESEND_API_KEY we log and

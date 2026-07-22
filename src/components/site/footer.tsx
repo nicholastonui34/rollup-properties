@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/site/logo";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const MAX_EXPLORE_LINKS = 4;
@@ -24,41 +25,54 @@ async function getExploreLinks() {
   }));
 }
 
-const FOOTER_COLUMNS = [
-  {
-    title: "Company",
-    links: [
-      { href: "/about", label: "About" },
-      { href: "/careers", label: "Careers" },
-      { href: "/news", label: "News" },
-    ],
-  },
-  {
-    title: "Support",
-    links: [
-      { href: "/help", label: "Help" },
-      { href: "/help#contact", label: "Contact" },
-    ],
-  },
-  {
+const COMPANY_COLUMN = {
+  title: "Company",
+  links: [
+    { href: "/about", label: "About" },
+    { href: "/careers", label: "Careers" },
+    { href: "/news", label: "News" },
+  ],
+};
+
+const SUPPORT_COLUMN = {
+  title: "Support",
+  links: [
+    { href: "/help", label: "Help" },
+    { href: "/help#contact", label: "Contact" },
+  ],
+};
+
+const LEGAL_COLUMN = {
+  title: "Legal",
+  links: [
+    { href: "/applicant-privacy-notice", label: "Applicant Privacy Notice" },
+    { href: "/privacy", label: "Privacy Policy" },
+    { href: "/terms", label: "Terms of Service" },
+  ],
+};
+
+export async function SiteFooter() {
+  const [exploreLinks, session] = await Promise.all([getExploreLinks(), auth()]);
+
+  // Mirrors the header's CTA logic (site/header.tsx): an already-authenticated
+  // LISTER/ADMIN already has "List with Us / Pro Media" tools on their
+  // dashboard, while a SEEKER-only session can't reach /signup (it bounces
+  // already-logged-in visitors home) — so the link is dropped rather than
+  // pointing somewhere that dead-ends.
+  const canList = session?.user && ["LISTER", "ADMIN"].includes(session.user.role);
+  const partnersColumn = {
     title: "Partners",
     links: [
       { href: "/advertise", label: "Advertise" },
-      { href: "/signup?role=LISTER", label: "List with Us / Pro Media" },
+      ...(!session?.user
+        ? [{ href: "/signup?role=LISTER", label: "List with Us / Pro Media" }]
+        : canList
+          ? [{ href: "/dashboard", label: "List with Us / Pro Media" }]
+          : []),
     ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { href: "/applicant-privacy-notice", label: "Applicant Privacy Notice" },
-      { href: "/privacy", label: "Privacy Policy" },
-      { href: "/terms", label: "Terms of Service" },
-    ],
-  },
-];
+  };
+  const footerColumns = [COMPANY_COLUMN, SUPPORT_COLUMN, partnersColumn, LEGAL_COLUMN];
 
-export async function SiteFooter() {
-  const exploreLinks = await getExploreLinks();
   return (
     <footer className="border-t border-border bg-secondary/50">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 sm:grid-cols-2 md:grid-cols-6">
@@ -88,7 +102,7 @@ export async function SiteFooter() {
           </div>
         )}
 
-        {FOOTER_COLUMNS.map((column) => (
+        {footerColumns.map((column) => (
           <div key={column.title}>
             <h3 className="mb-3 text-sm font-semibold text-foreground">{column.title}</h3>
             <ul className="space-y-2 text-sm">
@@ -108,7 +122,7 @@ export async function SiteFooter() {
       </div>
       <div className="border-t border-border/70 py-4">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 text-xs text-muted-foreground sm:px-6">
-          <p>© {new Date().getFullYear()} Rollup Properties · Nairobi, Kenya</p>
+          <p>© {new Date().getFullYear()} Nyoomba · Nairobi, Kenya</p>
           <nav className="flex flex-wrap gap-x-4 gap-y-1" aria-label="Legal">
             <Link href="/terms" className="transition-colors hover:text-foreground">
               Terms

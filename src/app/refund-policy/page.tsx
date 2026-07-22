@@ -5,7 +5,7 @@ import { UNLOCK_PRICE_KES } from "@/lib/listing-options";
 
 export const metadata: Metadata = {
   title: "Refund Policy",
-  description: "When and how contact-unlock fees are refunded on Rollup Properties.",
+  description: "When and how contact-unlock fees are refunded on Nyoomba.",
 };
 
 export default function RefundPolicyPage() {
@@ -43,15 +43,15 @@ export default function RefundPolicyPage() {
 
       <h2>4. What happens next</h2>
       <p>
-        A Rollup admin reviews the report — this can include contacting the lister and, where
+        A Nyoomba admin reviews the report — this can include contacting the lister and, where
         needed, revisiting the verification evidence. If the listing is confirmed fake, we process
         your refund manually to the M-Pesa number or card used for the payment, and the lister is
-        permanently banned from Rollup. This review is currently done by hand, so please allow up
+        permanently banned from Nyoomba. This review is currently done by hand, so please allow up
         to 5–7 business days.
       </p>
 
       <h2>5. Questions</h2>
-      <p>Refund questions: support@rollupproperties.co.ke</p>
+      <p>Refund questions: support@nyoomba.co.ke</p>
     </LegalLayout>
   );
 }

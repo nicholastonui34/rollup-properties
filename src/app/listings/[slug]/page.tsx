@@ -209,7 +209,7 @@ export default async function ListingDetailPage({
               <div className="flex flex-wrap items-center gap-2">
                 {isVerified ? (
                   <Badge
-                    title="Rollup confirmed this listing's photos, address and ownership before it went live."
+                    title="Nyoomba confirmed this listing's photos, address and ownership before it went live."
                   >
                     Verified {listing.verifiedAt!.toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
                   </Badge>
@@ -222,7 +222,7 @@ export default async function ListingDetailPage({
                 {!isVerified && (
                   <Badge
                     variant="outline"
-                    title="This listing hasn't completed Rollup's photo, address and ownership check yet."
+                    title="This listing hasn't completed Nyoomba's photo, address and ownership check yet."
                   >
                     Not yet verified
                   </Badge>
@@ -238,8 +238,8 @@ export default async function ListingDetailPage({
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
               {isVerified
-                ? "Verified means Rollup confirmed this listing's photos, address and ownership before it went live."
-                : "This listing hasn't completed Rollup's photo, address and ownership check yet — proceed with extra caution."}
+                ? "Verified means Nyoomba confirmed this listing's photos, address and ownership before it went live."
+                : "This listing hasn't completed Nyoomba's photo, address and ownership check yet — proceed with extra caution."}
             </p>
             <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
               {title}

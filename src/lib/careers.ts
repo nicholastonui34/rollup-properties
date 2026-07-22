@@ -22,11 +22,11 @@ export const CAREER_ROLES: CareerRole[] = [
     location: "Nairobi (field-based)",
     type: "Contract",
     summary:
-      "Visit listed properties in person to confirm photos, address and ownership before a listing goes live — the human check behind every verified badge on Rollup.",
+      "Visit listed properties in person to confirm photos, address and ownership before a listing goes live — the human check behind every verified badge on Nyoomba.",
     responsibilities: [
       "Visit properties within your assigned area to confirm the listing matches reality",
       "Photograph proof of visit and cross-check ownership or management documents",
-      "Log verification outcomes in the Rollup admin queue with clear notes",
+      "Log verification outcomes in the Nyoomba admin queue with clear notes",
       "Flag suspicious listings for further review",
     ],
     requirements: [
@@ -43,7 +43,7 @@ export const CAREER_ROLES: CareerRole[] = [
     location: "Nairobi",
     type: "Full-time",
     summary:
-      "Bring property managers, agents and landlords onto Rollup — you're selling a better way to list, not a broker fee.",
+      "Bring property managers, agents and landlords onto Nyoomba — you're selling a better way to list, not a broker fee.",
     responsibilities: [
       "Prospect and onboard property managers, landlords and agencies",
       "Walk new listers through creating their first verified listing",
@@ -63,7 +63,7 @@ export const CAREER_ROLES: CareerRole[] = [
     location: "Nairobi (hybrid)",
     type: "Full-time",
     summary:
-      "Own the story of Rollup — from social content to the articles on this site — as we build trust in a market used to broker fees and fake listings.",
+      "Own the story of Nyoomba — from social content to the articles on this site — as we build trust in a market used to broker fees and fake listings.",
     responsibilities: [
       "Plan and produce content across social, email and the News section",
       "Run campaigns that grow verified listing supply and serious seeker demand",
@@ -100,10 +100,10 @@ export const CAREER_ROLES: CareerRole[] = [
     location: "Nairobi (field-based)",
     type: "Freelance / Contract",
     summary:
-      "Photographers, videographers and 3D/virtual tour creators who shoot listings for Rollup's paid Pro Media service — helping listers stand out with photos and tours that actually sell the space.",
+      "Photographers, videographers and 3D/virtual tour creators who shoot listings for Nyoomba's paid Pro Media service — helping listers stand out with photos and tours that actually sell the space.",
     responsibilities: [
       "Shoot professional listing photography, video tours or 3D/virtual tours on request",
-      "Deliver on schedule and to Rollup's quality bar",
+      "Deliver on schedule and to Nyoomba's quality bar",
       "Work directly with listers to schedule shoots",
     ],
     requirements: [

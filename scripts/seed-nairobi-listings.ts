@@ -293,7 +293,7 @@ function buildDescription(
     parts.push(pick(CONDITION_SENTENCES));
     parts.push(pick(LANDMARK_SENTENCES));
   }
-  parts.push("Contact the manager directly through Rollup — no broker fees.");
+  parts.push("Contact the manager directly through Nyoomba — no broker fees.");
   return parts.join(" ");
 }
 

@@ -5,7 +5,7 @@ import { FAQ_GROUPS } from "@/lib/faqs";
 
 export const metadata: Metadata = {
   title: "Help Centre",
-  description: "Answers for renters, buyers, students and listers using Rollup Properties.",
+  description: "Answers for renters, buyers, students and listers using Nyoomba.",
 };
 
 export default function HelpPage() {

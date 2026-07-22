@@ -3,18 +3,18 @@ import { Sparkles, LayoutGrid, MapPinned } from "lucide-react";
 import { InquiryForm } from "@/components/advertise/inquiry-form";
 
 export const metadata: Metadata = {
-  title: "Advertise on Rollup",
-  description: "Reach serious renters and buyers across Kenya with featured listings and banner placements on Rollup Properties.",
+  title: "Advertise on Nyoomba",
+  description: "Reach serious renters and buyers across Kenya with featured listings and banner placements on Nyoomba.",
 };
 
 export default function AdvertisePage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
       <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-        Advertise on Rollup
+        Advertise on Nyoomba
       </h1>
       <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-        Rollup reaches renters and buyers actively searching for a home right now — not casual
+        Nyoomba reaches renters and buyers actively searching for a home right now — not casual
         browsers. Put your listing, brand or neighbourhood in front of that intent-driven
         audience.
       </p>

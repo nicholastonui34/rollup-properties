@@ -5,14 +5,14 @@ import { UNLOCK_PRICE_KES } from "@/lib/listing-options";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "The terms that govern using Rollup Properties to search, list, and unlock verified property contacts in Kenya.",
+  description: "The terms that govern using Nyoomba to search, list, and unlock verified property contacts in Kenya.",
 };
 
 export default function TermsPage() {
   return (
     <LegalLayout title="Terms of Service" updated="18 July 2026">
       <p>
-        These terms govern your use of Rollup Properties (&ldquo;Rollup&rdquo;, &ldquo;we&rdquo;,
+        These terms govern your use of Nyoomba (&ldquo;Nyoomba&rdquo;, &ldquo;we&rdquo;,
         &ldquo;us&rdquo;), a verified property marketplace serving Kenya. By creating an account or
         using the site, you agree to these terms.
       </p>
@@ -29,7 +29,7 @@ export default function TermsPage() {
       <ul>
         <li>You must own, manage, or have documented authority to list the property.</li>
         <li>Photos, address, price, and description must accurately represent the actual unit — no stock or recycled photos.</li>
-        <li>Every listing goes through Rollup&apos;s verification process (identity check + listing review) before it appears publicly.</li>
+        <li>Every listing goes through Nyoomba&apos;s verification process (identity check + listing review) before it appears publicly.</li>
         <li>Live listings expire 30 days after verification and must be renewed to stay visible.</li>
         <li>Listings found to be fake, duplicated, or materially misleading will be rejected, and repeat or fraudulent behaviour results in a permanent ban.</li>
       </ul>
@@ -46,7 +46,7 @@ export default function TermsPage() {
 
       <h2>4. Verification is not a guarantee</h2>
       <p>
-        Rollup verifies listings before they go live using photo review, address checks, and (at
+        Nyoomba verifies listings before they go live using photo review, address checks, and (at
         this stage) manual admin review. Verification substantially reduces — but cannot fully
         eliminate — the risk of a fake or stale listing. Always confirm details directly with the
         manager before making any payment outside the platform.
@@ -55,7 +55,7 @@ export default function TermsPage() {
       <h2>5. Reports and enforcement</h2>
       <p>
         Any listing can be reported by a signed-in user. Listings that accumulate multiple open
-        reports are automatically suspended pending review. Rollup may remove any listing or
+        reports are automatically suspended pending review. Nyoomba may remove any listing or
         suspend any account at its discretion, including for suspected fraud, harassment, or
         violation of these terms.
       </p>
@@ -66,16 +66,16 @@ export default function TermsPage() {
         our <Link href="/refund-policy" className="text-primary underline-offset-2 hover:underline">Refund Policy</Link>.
       </p>
 
-      <h2>7. Rollup&apos;s role</h2>
+      <h2>7. Nyoomba&apos;s role</h2>
       <p>
-        Rollup is a listings and verification platform. We are not a party to, and do not
+        Nyoomba is a listings and verification platform. We are not a party to, and do not
         guarantee, any tenancy, sale, or other agreement between a seeker and a lister. Disputes
         over rent, deposits, or the condition of a property are between the parties involved.
       </p>
 
       <h2>8. Changes to these terms</h2>
       <p>
-        We may update these terms as the product evolves. Continued use of Rollup after a change
+        We may update these terms as the product evolves. Continued use of Nyoomba after a change
         means you accept the updated terms.
       </p>
 
@@ -83,7 +83,7 @@ export default function TermsPage() {
       <p>These terms are governed by the laws of Kenya.</p>
 
       <h2>10. Contact</h2>
-      <p>Questions about these terms: support@rollupproperties.co.ke</p>
+      <p>Questions about these terms: support@nyoomba.co.ke</p>
     </LegalLayout>
   );
 }

@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 
-export const CLOUDINARY_FOLDER = "rollup-properties/listings";
-export const CLOUDINARY_EVIDENCE_FOLDER = "rollup-properties/verification-evidence";
+export const CLOUDINARY_FOLDER = "nyoomba/listings";
+export const CLOUDINARY_EVIDENCE_FOLDER = "nyoomba/verification-evidence";
 
 function getConfig() {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
