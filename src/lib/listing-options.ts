@@ -1,4 +1,5 @@
 import type {
+  ApplicationStatus,
   ListingPurpose,
   ListingStatus,
   MediaRequestStatus,
@@ -161,3 +162,42 @@ export const TOUR_REQUEST_STATUS_BADGE_VARIANT: Record<
   COMPLETED: "outline",
   CANCELLED: "destructive",
 };
+
+// Rental application form (post_unlock_cta_suite §PM microsite) — buckets
+// rather than an exact figure, matches the spec's "monthly income range".
+export const INCOME_RANGES = [
+  "Under KES 30,000",
+  "KES 30,000 – 60,000",
+  "KES 60,000 – 100,000",
+  "KES 100,000 – 200,000",
+  "Above KES 200,000",
+] as const;
+
+export const APPLICATION_STATUS_LABELS: Record<ApplicationStatus, string> = {
+  SUBMITTED: "Submitted",
+  UNDER_REVIEW: "Under review",
+  SHORTLISTED: "Shortlisted",
+  APPROVED: "Approved",
+  DECLINED: "Declined",
+};
+
+export const APPLICATION_STATUS_BADGE_VARIANT: Record<
+  ApplicationStatus,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
+  SUBMITTED: "secondary",
+  UNDER_REVIEW: "secondary",
+  SHORTLISTED: "default",
+  APPROVED: "default",
+  DECLINED: "destructive",
+};
+
+// Ordered stages for the applicant-facing stepper — APPROVED/DECLINED are
+// alternate terminal states, not a strict linear 5th step, but rendering
+// them as the final stepper node reads correctly either way.
+export const APPLICATION_STATUS_STEPS: ApplicationStatus[] = [
+  "SUBMITTED",
+  "UNDER_REVIEW",
+  "SHORTLISTED",
+  "APPROVED",
+];

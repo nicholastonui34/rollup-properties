@@ -1,11 +1,13 @@
 "use server";
 
+import crypto from "node:crypto";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { signIn } from "@/lib/auth";
 import { normalizeKenyanPhone } from "@/lib/phone";
+import { slugifyPmName } from "@/lib/pm";
 import { Prisma } from "@prisma/client";
 
 export type AuthFormState = { error?: string } | undefined;
@@ -46,6 +48,16 @@ export async function signupAction(
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
 
+  // LISTER accounts double as property managers with a public microsite
+  // (post_unlock_cta_suite) — give them a pmSlug up front so an Apply link
+  // is never generated mid-request for a brand-new account. The id isn't
+  // known yet at create time, so a random suffix stands in for it here
+  // (getOrCreatePmSlug uses the id tail for pre-existing accounts instead).
+  const pmSlug =
+    parsed.data.role === "LISTER"
+      ? `${slugifyPmName(parsed.data.name)}-${crypto.randomBytes(2).toString("hex")}`
+      : undefined;
+
   try {
     await prisma.user.create({
       data: {
@@ -54,6 +66,7 @@ export async function signupAction(
         email: parsed.data.email || null,
         passwordHash,
         role: parsed.data.role,
+        pmSlug,
       },
     });
   } catch (e) {

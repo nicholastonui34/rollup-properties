@@ -26,7 +26,7 @@ export const metadata: Metadata = { title: "Your listings" };
 
 export default async function DashboardPage() {
   const session = await auth();
-  const [user, listings, pendingTourRequests] = await Promise.all([
+  const [user, listings, pendingTourRequests, pendingApplications] = await Promise.all([
     prisma.user.findUnique({
       where: { id: session!.user.id },
       select: { idNumber: true, idVerifiedAt: true },
@@ -48,6 +48,9 @@ export default async function DashboardPage() {
     prisma.tourRequest.count({
       where: { listing: { listerId: session!.user.id }, status: "PENDING" },
     }),
+    prisma.rentalApplication.count({
+      where: { pmId: session!.user.id, status: "SUBMITTED" },
+    }),
   ]);
 
   return (
@@ -68,6 +71,18 @@ export default async function DashboardPage() {
               Tour requests
               {pendingTourRequests > 0 && <Badge className="ml-1">{pendingTourRequests}</Badge>}
             </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link href="/dashboard/applications">
+              Applications
+              {pendingApplications > 0 && <Badge className="ml-1">{pendingApplications}</Badge>}
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link href="/dashboard/availability">Availability</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link href="/dashboard/settings/pm-profile">Microsite</Link>
           </Button>
           <Button asChild size="lg">
             <Link href="/dashboard/listings/new">New listing</Link>
