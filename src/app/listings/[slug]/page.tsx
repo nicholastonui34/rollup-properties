@@ -18,7 +18,6 @@ import { initiateUnlockAction } from "./unlock-actions";
 import { UnlockDialog } from "@/components/listing/unlock-dialog";
 import { BookTourDialog } from "@/components/listing/book-tour-dialog";
 import { RealtorLink } from "@/components/listing/realtor-link";
-import { ApplyButton } from "@/components/listing/apply-button";
 import { FavoriteButton } from "@/components/listing/favorite-button";
 import { ReportButton } from "@/components/listing/report-button";
 import { toggleFavoriteAction } from "@/app/favorites/actions";
@@ -340,9 +339,6 @@ export default async function ListingDetailPage({
                         listingId={listing.id}
                       />
                     </div>
-                  )}
-                  {listing.applicationUrl && (
-                    <ApplyButton url={listing.applicationUrl} listingId={listing.id} />
                   )}
                 </>
               ) : listing.status !== "LIVE" ? (
