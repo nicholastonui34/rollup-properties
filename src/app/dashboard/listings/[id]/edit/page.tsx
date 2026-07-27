@@ -123,6 +123,7 @@ export default async function EditListingPage({
             videoUrl: listing.videoUrl,
             managerAgencyName: listing.managerAgencyName,
             managerWebsiteUrl: listing.managerWebsiteUrl,
+            applicationUrl: listing.applicationUrl,
             areaId: listing.areaId,
             estate: listing.estate,
             streetAddress: listing.streetAddress,

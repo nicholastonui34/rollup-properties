@@ -169,6 +169,10 @@ model Listing {
   videoUrl         String?
   managerWebsiteUrl   String?
   managerAgencyName   String?
+  // Property manager's own website or rental application portal. Surfaced as an
+  // "Apply" button once a seeker unlocks contact details (see Unlock model) — Nyoomba
+  // stays the discovery/lead-gen layer while applications happen on the manager's site.
+  applicationUrl      String?
   county           String
   town             String
   areaId           String?
