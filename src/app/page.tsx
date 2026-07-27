@@ -25,7 +25,7 @@ const POPULAR_AREAS = [
 const STEPS = [
   {
     title: "Search verified listings",
-    body: "Every home on Rollup is checked before it goes live — real unit, real photos, real address. The verified badge shows when it was last confirmed.",
+    body: "Every home on Nyoomba is checked before it goes live — real unit, real photos, real address. The verified badge shows when it was last confirmed.",
   },
   {
     title: "Unlock the direct contact",
@@ -164,7 +164,7 @@ export default function Home() {
       <section id="how-it-works" className="bg-secondary/40">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
           <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            How Rollup works
+            How Nyoomba works
           </h2>
           <p className="mt-3 max-w-xl text-muted-foreground">
             Built for house-hunters tired of fake photos, vague locations and

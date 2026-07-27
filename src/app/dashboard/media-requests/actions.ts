@@ -57,7 +57,7 @@ export async function submitMediaRequestAction(
   if (teamEmail) {
     await sendEmail(
       teamEmail,
-      "New Pro Media request — Rollup Properties",
+      "New Pro Media request — Nyoomba",
       `<p>${session.user.name ?? "A lister"} requested: ${parsed.data.services.join(", ")}.</p>
        <p><strong>Location:</strong> ${parsed.data.location}</p>
        ${parsed.data.preferredDate ? `<p><strong>Preferred date:</strong> ${parsed.data.preferredDate}</p>` : ""}

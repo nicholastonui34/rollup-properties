@@ -29,15 +29,15 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Rollup Properties — Verified homes to rent & buy in Kenya",
-    template: "%s | Rollup Properties",
+    default: "Nyoomba — Verified homes to rent & buy in Kenya",
+    template: "%s | Nyoomba",
   },
   description: DESCRIPTION,
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Rollup",
+    title: "Nyoomba",
   },
   icons: {
     apple: "/icons/icon-192",
@@ -46,12 +46,12 @@ export const metadata: Metadata = {
     type: "website",
     siteName: SITE_NAME,
     locale: "en_KE",
-    title: "Rollup Properties — Verified homes to rent & buy in Kenya",
+    title: "Nyoomba — Verified homes to rent & buy in Kenya",
     description: DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rollup Properties — Verified homes to rent & buy in Kenya",
+    title: "Nyoomba — Verified homes to rent & buy in Kenya",
     description: DESCRIPTION,
   },
 };

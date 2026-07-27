@@ -5,7 +5,7 @@
 // data are always network-only so nothing here can ever serve stale/wrong
 // payment, auth, or listing state.
 const CACHE_VERSION = "v1";
-const SHELL_CACHE = `rollup-shell-${CACHE_VERSION}`;
+const SHELL_CACHE = `nyoomba-shell-${CACHE_VERSION}`;
 const OFFLINE_URL = "/offline";
 
 self.addEventListener("install", (event) => {

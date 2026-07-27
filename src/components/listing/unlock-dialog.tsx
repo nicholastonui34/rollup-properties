@@ -60,7 +60,7 @@ export function UnlockDialog({
             )}
           </div>
           <p className="text-muted-foreground">
-            Rollup confirmed this listing&apos;s photos, address and ownership before it went live.
+            Nyoomba confirmed this listing&apos;s photos, address and ownership before it went live.
           </p>
           <p className="text-muted-foreground">
             If it turns out to be fake, you get a full refund and the lister is permanently

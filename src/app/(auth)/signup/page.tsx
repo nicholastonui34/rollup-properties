@@ -14,7 +14,9 @@ export default async function SignupPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await auth();
-  if (session?.user) redirect("/");
+  if (session?.user) {
+    redirect(["LISTER", "ADMIN"].includes(session.user.role) ? "/dashboard" : "/");
+  }
 
   const params = await searchParams;
   const defaultRole = params.role === "LISTER" ? "LISTER" : "SEEKER";

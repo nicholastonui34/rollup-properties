@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Rollup Properties — Verified homes to rent & buy in Kenya";
+export const alt = "Nyoomba — Verified homes to rent & buy in Kenya";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -46,10 +46,7 @@ export default function Image() {
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span style={{ fontSize: 30, fontWeight: 700, color: CREAM, letterSpacing: -0.5 }}>
-              Rollup
-            </span>
-            <span style={{ fontSize: 15, fontWeight: 600, color: GOLD, letterSpacing: 4 }}>
-              PROPERTIES
+              Nyoomba
             </span>
           </div>
         </div>

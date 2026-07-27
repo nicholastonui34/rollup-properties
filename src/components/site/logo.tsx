@@ -42,16 +42,11 @@ export function Logo({
     <Link
       href="/"
       className={cn("flex items-center gap-2.5 shrink-0", className)}
-      aria-label="Rollup Properties — home"
+      aria-label="Nyoomba — home"
     >
       <LogoMark className={markClassName} />
-      <span className="flex flex-col leading-none">
-        <span className="font-display text-xl font-semibold tracking-tight text-foreground">
-          Rollup
-        </span>
-        <span className="text-[0.65rem] font-medium uppercase tracking-[0.22em] text-gold-foreground/70 dark:text-gold">
-          Properties
-        </span>
+      <span className="font-display text-xl font-semibold tracking-tight text-foreground">
+        Nyoomba
       </span>
     </Link>
   );

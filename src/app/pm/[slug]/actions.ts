@@ -149,7 +149,7 @@ export async function submitApplicationAction(
       }.</p>
        <p><strong>Occupation:</strong> ${parsed.data.occupation} at ${parsed.data.employer}</p>
        <p><strong>Monthly income:</strong> ${parsed.data.monthlyIncomeRange}</p>
-       <p>Review and respond from your Rollup Properties dashboard.</p>`
+       <p>Review and respond from your Nyoomba dashboard.</p>`
     );
   }
 
@@ -157,7 +157,7 @@ export async function submitApplicationAction(
     parsed.data.email,
     `Application received — ${pm.name}`,
     `<p>Your rental application to <strong>${pm.name}</strong> has been received.</p>
-     <p>You can track its status any time from your Rollup Properties account.</p>`
+     <p>You can track its status any time from your Nyoomba account.</p>`
   );
 
   return { success: true, applicationId: application.id };

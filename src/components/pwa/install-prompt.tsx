@@ -5,7 +5,7 @@ import { Download, Share, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
 
-const DISMISS_KEY = "rollup-install-dismissed-at";
+const DISMISS_KEY = "nyoomba-install-dismissed-at";
 const DISMISS_DAYS = 14;
 
 interface BeforeInstallPromptEvent extends Event {
@@ -94,7 +94,7 @@ export function InstallPrompt() {
         >
           <X className="size-4" />
         </button>
-        <p className="pr-6 text-sm font-medium text-foreground">Install Rollup Properties</p>
+        <p className="pr-6 text-sm font-medium text-foreground">Install Nyoomba</p>
         <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
           Tap <Share className="size-4 shrink-0" aria-hidden="true" /> then &ldquo;Add to Home
           Screen&rdquo;.
@@ -108,7 +108,7 @@ export function InstallPrompt() {
       <div className="fixed inset-x-0 bottom-0 z-50 flex items-center gap-3 border-t border-border bg-card p-4 shadow-lg sm:mx-auto sm:mb-4 sm:max-w-sm sm:rounded-2xl sm:border">
         <Download className="size-5 shrink-0 text-primary" aria-hidden="true" />
         <div className="flex-1">
-          <p className="text-sm font-medium text-foreground">Install Rollup Properties</p>
+          <p className="text-sm font-medium text-foreground">Install Nyoomba</p>
           <p className="text-xs text-muted-foreground">Quick access, right from your home screen.</p>
         </div>
         <Button type="button" size="sm" onClick={handleInstall}>

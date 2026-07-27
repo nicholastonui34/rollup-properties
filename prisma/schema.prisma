@@ -1,4 +1,4 @@
-// Rollup Properties — data model (BRIEF.md §7)
+// Nyoomba — data model (BRIEF.md §7)
 generator client {
   provider = "prisma-client-js"
 }

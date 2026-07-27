@@ -24,7 +24,7 @@ export default async function LoginPage() {
         <LoginForm />
       </div>
       <p className="mt-6 text-sm text-muted-foreground">
-        New to Rollup?{" "}
+        New to Nyoomba?{" "}
         <Link href="/signup" className="font-medium text-primary hover:underline">
           Create a free account
         </Link>

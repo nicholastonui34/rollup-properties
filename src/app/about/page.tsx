@@ -5,18 +5,18 @@ import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Why Rollup Properties exists and how we verify every listing before it goes live.",
+  description: "Why Nyoomba exists and how we verify every listing before it goes live.",
 };
 
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
       <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-        About Rollup
+        About Nyoomba
       </h1>
       <p className="mt-4 text-base leading-relaxed text-muted-foreground">
         Finding a home in Kenya shouldn&apos;t mean chasing fake photos, vague locations, or
-        paying a broker for a house that turns out not to exist. Rollup Properties exists to fix
+        paying a broker for a house that turns out not to exist. Nyoomba exists to fix
         that — a housing marketplace where every listing is checked by a real person before it
         ever reaches you, and where you deal directly with the property manager, no middleman in
         between.
@@ -27,7 +27,7 @@ export default function AboutPage() {
           <ShieldCheck className="size-6 text-primary" aria-hidden="true" />
           <h2 className="mt-3 text-sm font-semibold text-foreground">Verified before it goes live</h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Every listing&apos;s photos, address and ownership are checked by a Rollup verifier
+            Every listing&apos;s photos, address and ownership are checked by a Nyoomba verifier
             before it&apos;s shown publicly.
           </p>
         </div>
@@ -51,7 +51,7 @@ export default function AboutPage() {
 
       <h2 className="mt-12 text-sm font-semibold text-foreground">How verification builds trust</h2>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-        Before a listing goes live, a Rollup verifier confirms it matches reality — the unit, the
+        Before a listing goes live, a Nyoomba verifier confirms it matches reality — the unit, the
         address, and the lister&apos;s right to manage it. The verified badge on a listing shows
         the date of that check, and listings are periodically re-confirmed so the badge stays
         meaningful, not a one-time stamp on a stale listing.
@@ -61,7 +61,7 @@ export default function AboutPage() {
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
         We&apos;re launching in Nairobi first — rentals, then sales, then other Kenyan towns as
         our verification network grows. Every decision we make is weighed against one question:
-        does this make Rollup more trustworthy for the next person searching for a home?
+        does this make Nyoomba more trustworthy for the next person searching for a home?
       </p>
 
       <div className="mt-10 flex flex-wrap gap-3">
@@ -75,8 +75,8 @@ export default function AboutPage() {
 
       <p className="mt-10 text-sm text-muted-foreground">
         Questions? Reach us at{" "}
-        <a href="mailto:support@rollupproperties.co.ke" className="text-primary hover:underline">
-          support@rollupproperties.co.ke
+        <a href="mailto:support@nyoomba.co.ke" className="text-primary hover:underline">
+          support@nyoomba.co.ke
         </a>
         .
       </p>

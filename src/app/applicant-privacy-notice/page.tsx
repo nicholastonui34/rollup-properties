@@ -3,7 +3,7 @@ import { LegalLayout } from "@/components/legal/legal-layout";
 
 export const metadata: Metadata = {
   title: "Applicant Privacy Notice",
-  description: "How Rollup Properties handles personal data submitted through job applications and tour/contact request forms.",
+  description: "How Nyoomba handles personal data submitted through job applications and tour/contact request forms.",
 };
 
 export default function ApplicantPrivacyNoticePage() {
@@ -14,7 +14,7 @@ export default function ApplicantPrivacyNoticePage() {
       </p>
 
       <p>
-        This notice explains what personal data Rollup Properties collects when you apply for a
+        This notice explains what personal data Nyoomba collects when you apply for a
         role with us, book a property tour, or submit a contact/inquiry form, and how we handle
         it under the Kenya Data Protection Act, 2019.
       </p>
@@ -50,7 +50,7 @@ export default function ApplicantPrivacyNoticePage() {
 
       <h2>4. Who we share it with</h2>
       <p>
-        Job applications are seen only by Rollup&apos;s hiring team. Tour requests are shared with
+        Job applications are seen only by Nyoomba&apos;s hiring team. Tour requests are shared with
         the property manager for the specific listing you inquired about. We do not sell any of
         this data to third parties.
       </p>
@@ -70,7 +70,7 @@ export default function ApplicantPrivacyNoticePage() {
       </p>
 
       <h2>7. Contact</h2>
-      <p>Data requests relating to this notice: support@rollupproperties.co.ke</p>
+      <p>Data requests relating to this notice: support@nyoomba.co.ke</p>
     </LegalLayout>
   );
 }

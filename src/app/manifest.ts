@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Rollup Properties",
-    short_name: "Rollup",
+    name: "Nyoomba",
+    short_name: "Nyoomba",
     description:
       "Search verified rental and sale properties across Kenya. Real photos, real addresses, honest prices — no brokers.",
     start_url: "/",

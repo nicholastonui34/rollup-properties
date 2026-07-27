@@ -143,7 +143,7 @@ export function ApplicationForm({
       <label className="flex items-start gap-2 text-xs text-muted-foreground">
         <input type="checkbox" name="consent" required className="mt-0.5 size-4 rounded border-border" />
         <span>
-          I consent to Rollup Properties sharing this application, including my uploaded documents, with
+          I consent to Nyoomba sharing this application, including my uploaded documents, with
           this property manager for the purpose of reviewing my application, in line with the Kenya Data
           Protection Act, 2019. See our{" "}
           <Link href="/privacy" className="underline">Privacy Policy</Link>.

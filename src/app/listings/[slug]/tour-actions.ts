@@ -158,7 +158,7 @@ export async function submitTourRequestAction(
       month: "long",
     });
     const whatsappUrl = `https://wa.me/${phone.replace("+", "")}?text=${encodeURIComponent(
-      `Hi ${parsed.data.name}, thanks for your interest in "${listing.title}" on Rollup Properties! `
+      `Hi ${parsed.data.name}, thanks for your interest in "${listing.title}" on Nyoomba! `
     )}`;
     await sendEmail(
       listing.lister.email,
@@ -169,13 +169,13 @@ export async function submitTourRequestAction(
        ${parsed.data.message ? `<p><strong>Message:</strong> ${parsed.data.message}</p>` : ""}
        ${videoRoomUrl ? `<p><strong>Video call link:</strong> <a href="${videoRoomUrl}">${videoRoomUrl}</a></p>` : ""}
        <p><a href="${whatsappUrl}">Message ${parsed.data.name} on WhatsApp</a></p>
-       <p>Manage this request from your Rollup Properties dashboard.</p>`
+       <p>Manage this request from your Nyoomba dashboard.</p>`
     );
   }
 
   if (videoRoomUrl && parsed.data.email) {
     const pmWhatsappUrl = `https://wa.me/${listing.lister.phone?.replace("+", "") ?? ""}?text=${encodeURIComponent(
-      `Hi, following up on my video tour booking for "${listing.title}" on Rollup Properties.`
+      `Hi, following up on my video tour booking for "${listing.title}" on Nyoomba.`
     )}`;
     await sendEmail(
       parsed.data.email,

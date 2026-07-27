@@ -3,14 +3,14 @@ import { LegalLayout } from "@/components/legal/legal-layout";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "How Rollup Properties collects, uses, and protects your personal data.",
+  description: "How Nyoomba collects, uses, and protects your personal data.",
 };
 
 export default function PrivacyPage() {
   return (
     <LegalLayout title="Privacy Policy" updated="18 July 2026">
       <p>
-        This policy explains what personal data Rollup Properties collects, why, and how we
+        This policy explains what personal data Nyoomba collects, why, and how we
         protect it.
       </p>
 
@@ -21,7 +21,7 @@ export default function PrivacyPage() {
           hashed password.
         </li>
         <li>
-          <strong>Identity data (Listers):</strong> national ID number, submitted so a Rollup
+          <strong>Identity data (Listers):</strong> national ID number, submitted so a Nyoomba
           verifier can confirm a lister&apos;s identity before their first listing goes live.
         </li>
         <li>
@@ -49,12 +49,12 @@ export default function PrivacyPage() {
       </ul>
 
       <h2>3. Who we share it with</h2>
-      <p>We share the minimum data needed with the services that power Rollup:</p>
+      <p>We share the minimum data needed with the services that power Nyoomba:</p>
       <ul>
         <li><strong>Paystack</strong> — payment processing for contact unlocks.</li>
         <li><strong>Cloudinary</strong> — hosting for listing photos and verification evidence.</li>
         <li><strong>Resend</strong> — delivering saved-search alert emails.</li>
-        <li>Rollup verifiers and admin staff, internally, to review listings and reports.</li>
+        <li>Nyoomba verifiers and admin staff, internally, to review listings and reports.</li>
       </ul>
       <p>We do not sell your personal data to third parties.</p>
 
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
       <h2>5. Your rights</h2>
       <p>
         Under the Kenya Data Protection Act, 2019, you can request access to, correction of, or
-        deletion of your personal data by contacting us at the address below. Rollup is working
+        deletion of your personal data by contacting us at the address below. Nyoomba is working
         toward registering as a data controller with Kenya&apos;s Office of the Data Protection
         Commissioner (ODPC) ahead of public launch.
       </p>
@@ -85,13 +85,13 @@ export default function PrivacyPage() {
       </p>
 
       <h2>8. Children</h2>
-      <p>Rollup is not intended for use by anyone under 18.</p>
+      <p>Nyoomba is not intended for use by anyone under 18.</p>
 
       <h2>9. Changes to this policy</h2>
       <p>We&apos;ll update this page if how we handle your data materially changes.</p>
 
       <h2>10. Contact</h2>
-      <p>Privacy questions or data requests: support@rollupproperties.co.ke</p>
+      <p>Privacy questions or data requests: support@nyoomba.co.ke</p>
     </LegalLayout>
   );
 }
