@@ -9,6 +9,7 @@ import { slugify } from "@/lib/slug";
 import { deleteCloudinaryImage } from "@/lib/cloudinary";
 import { FREE_LISTING_QUOTA, MAX_LISTING_PHOTOS, MIN_LISTING_PHOTOS } from "@/lib/listing-options";
 import { isAllowedTourUrl, toVideoEmbedUrl } from "@/lib/media-embed";
+import { sanitizeHttpsUrl } from "@/lib/safe-url";
 import { geocodeAddress } from "@/lib/geocoding";
 
 export type ListingFormState = { error?: string } | undefined;
@@ -62,6 +63,14 @@ const listingSchema = z.object({
     .refine((v) => v === undefined || z.string().url().safeParse(v).success, {
       message: "Enter a valid website URL",
     }),
+  applicationUrl: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v ? v : undefined))
+    .refine((v) => v === undefined || sanitizeHttpsUrl(v) !== null, {
+      message: "Application URL must be a valid https:// link",
+    }),
   areaId: z.string().min(1, "Select an area"),
   estate: z.string().trim().optional(),
   streetAddress: z.string().trim().min(3, "Enter a street address or landmark"),
@@ -95,6 +104,7 @@ function parseListingForm(formData: FormData) {
     videoUrl: formData.get("videoUrl") || undefined,
     managerAgencyName: formData.get("managerAgencyName") || undefined,
     managerWebsiteUrl: formData.get("managerWebsiteUrl") || undefined,
+    applicationUrl: formData.get("applicationUrl") || undefined,
     areaId: formData.get("areaId"),
     estate: formData.get("estate"),
     streetAddress: formData.get("streetAddress"),
@@ -184,6 +194,9 @@ export async function createListingAction(
         videoUrl: parsed.data.videoUrl ? toVideoEmbedUrl(parsed.data.videoUrl) : null,
         managerAgencyName: parsed.data.managerAgencyName ?? null,
         managerWebsiteUrl: parsed.data.managerWebsiteUrl ?? null,
+        applicationUrl: parsed.data.applicationUrl
+          ? sanitizeHttpsUrl(parsed.data.applicationUrl)
+          : null,
         county: area.county,
         town: area.town,
         areaId: area.id,
@@ -252,6 +265,9 @@ export async function updateListingAction(
         videoUrl: parsed.data.videoUrl ? toVideoEmbedUrl(parsed.data.videoUrl) : null,
         managerAgencyName: parsed.data.managerAgencyName ?? null,
         managerWebsiteUrl: parsed.data.managerWebsiteUrl ?? null,
+        applicationUrl: parsed.data.applicationUrl
+          ? sanitizeHttpsUrl(parsed.data.applicationUrl)
+          : null,
         county: area.county,
         town: area.town,
         areaId: area.id,

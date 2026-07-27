@@ -42,6 +42,7 @@ type ExistingListing = {
   videoUrl: string | null;
   managerWebsiteUrl: string | null;
   managerAgencyName: string | null;
+  applicationUrl: string | null;
   areaId: string | null;
   estate: string | null;
   streetAddress: string;
@@ -300,6 +301,27 @@ export function ListingForm({
               defaultValue={listing?.managerWebsiteUrl ?? ""}
             />
           </div>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Applications (optional)</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Provide your official website or rental application page. After a user unlocks your
+            contact details, an <strong>Apply</strong> button will appear on your property listing
+            and direct them to this page.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="applicationUrl">Official Website / Application Portal</Label>
+          <Input
+            id="applicationUrl"
+            name="applicationUrl"
+            type="url"
+            placeholder="https://www.exampleproperty.com/apply"
+            defaultValue={listing?.applicationUrl ?? ""}
+          />
         </div>
       </section>
 
