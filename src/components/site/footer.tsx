@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Logo } from "@/components/site/logo";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -122,7 +123,24 @@ export async function SiteFooter() {
       </div>
       <div className="border-t border-border/70 py-4">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 text-xs text-muted-foreground sm:px-6">
-          <p>© {new Date().getFullYear()} Nyoomba · Nairobi, Kenya</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p>© {new Date().getFullYear()} Nyoomba · Nairobi, Kenya</p>
+            <a
+              href="https://www.nilltechsolutions.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Image
+                src="/nilltech-logo.jpg"
+                alt="NillTech Solutions"
+                width={18}
+                height={18}
+                className="rounded-sm"
+              />
+              Powered by NillTech
+            </a>
+          </div>
           <nav className="flex flex-wrap gap-x-4 gap-y-1" aria-label="Legal">
             <Link href="/terms" className="transition-colors hover:text-foreground">
               Terms
