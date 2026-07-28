@@ -21,7 +21,7 @@ const HIGHLIGHTS = [
   {
     icon: Building2,
     title: "A second revenue line",
-    body: "We're now building branded websites for agencies and property managers, with tenant apply/book/pay handled on our rails.",
+    body: "We're now building branded websites for agencies and property managers, with tenant applications and tour booking handled on our rails — we take a platform fee, never a cut of rent.",
   },
   {
     icon: TrendingUp,

@@ -7,7 +7,7 @@ import { AgencyWebsiteInquiryForm } from "@/components/agency-websites/inquiry-f
 export const metadata: Metadata = {
   title: "Websites for real estate agencies",
   description:
-    "A branded website for your agency or property portfolio, with tenant applications, tour booking and verified listings handled by Nyoomba.",
+    "A branded website for your agency or property portfolio, with tenant applications and tour booking handled on Nyoomba — rent stays between you and your tenant.",
 };
 
 const FEATURES = [
@@ -40,8 +40,10 @@ export default function AgencyWebsitesPage() {
         Websites for real estate agencies
       </h1>
       <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-        Get a branded home for your listings, with tenant applications, tour booking and payments
-        handled on Nyoomba&apos;s platform — no separate site to build or maintain.
+        Get a branded home for your listings, with tenant applications and tour booking handled
+        on Nyoomba&apos;s platform — no separate site to build or maintain. Rent, deposits and any
+        ongoing payments stay a direct arrangement between you and your tenant; we only ever
+        charge our own platform fees.
       </p>
 
       <div className="mt-10 grid gap-5 sm:grid-cols-2">
