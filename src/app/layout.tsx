@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { RegisterServiceWorker } from "@/components/pwa/register-sw";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
+import { ChatWidget } from "@/components/chat/chat-widget";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const geistSans = Geist({
@@ -76,6 +77,7 @@ export default function RootLayout({
         <SiteFooter />
         <RegisterServiceWorker />
         <InstallPrompt />
+        <ChatWidget />
       </body>
     </html>
   );

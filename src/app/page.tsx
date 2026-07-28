@@ -25,15 +25,15 @@ const POPULAR_AREAS = [
 const STEPS = [
   {
     title: "Search verified listings",
-    body: "Every home on Nyoomba is checked before it goes live — real unit, real photos, real address. The verified badge shows when it was last confirmed.",
+    body: "Every home is checked before it goes live — real unit, real photos, real address.",
   },
   {
     title: "Unlock the direct contact",
-    body: "Pay a small one-time fee via M-Pesa to reveal the property manager's phone number. Far cheaper than a broker's viewing fee — and it's yours forever.",
+    body: "One small M-Pesa fee reveals the manager's number — yours forever, no broker fee.",
   },
   {
     title: "Deal directly. No middlemen.",
-    body: "Call or WhatsApp the manager, view the house, and negotiate directly. If a listing turns out fake, we refund you and ban the lister.",
+    body: "Call or WhatsApp the manager directly. Fake listing? Full refund, lister banned.",
   },
 ];
 
@@ -61,9 +61,8 @@ export default function Home() {
             Skip the broker.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-primary-foreground/80 sm:text-lg">
-            Real photos. Real addresses. Honest prices. Search verified rentals
-            and homes for sale across Kenya, then talk directly to the property
-            manager.
+            Real photos, real addresses, honest prices — search verified
+            rentals and sales across Kenya, then talk directly to the manager.
           </p>
 
           {/* Search bar */}
@@ -114,9 +113,9 @@ export default function Home() {
       <section className="border-b border-border bg-background">
         <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:grid-cols-3 sm:px-6">
           {[
-            ["Verified before it goes live", "Photos, address and ownership checked on every single listing."],
-            ["Direct manager contacts", "One small M-Pesa payment. No broker fees, no viewing scams."],
-            ["Fake listing? Full refund.", "Proven fake after unlock — you get your money back, they get banned."],
+            ["Verified before it goes live", "Photos, address and ownership, checked."],
+            ["Direct manager contacts", "One small M-Pesa fee. No brokers, no scams."],
+            ["Fake listing? Full refund.", "Money back, lister banned."],
           ].map(([title, body]) => (
             <div key={title} className="flex gap-3">
               <span
@@ -137,7 +136,7 @@ export default function Home() {
       </section>
 
       {/* Student Housing Hub */}
-      <section className="border-b border-border bg-background">
+      <section id="student-housing" className="scroll-mt-20 border-b border-border bg-background">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
           <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
             <Badge variant="secondary">Student Housing Hub</Badge>
@@ -145,9 +144,8 @@ export default function Home() {
               Verified housing near your campus
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              Hostels, shared apartments and independent units within 10km of Nairobi&apos;s main
-              universities — same verification, same refund guarantee, just filtered to what
-              actually matters for students.
+              Hostels, shared apartments and units near six Nairobi campuses — verified and
+              ready before intake, including for students arriving from outside Kenya.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               {UNIVERSITIES.map((u) => (
@@ -167,8 +165,7 @@ export default function Home() {
             How Nyoomba works
           </h2>
           <p className="mt-3 max-w-xl text-muted-foreground">
-            Built for house-hunters tired of fake photos, vague locations and
-            broker fees for houses that don&apos;t exist.
+            No fake photos, vague locations, or broker fees.
           </p>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {STEPS.map((step, i) => (
@@ -219,8 +216,7 @@ export default function Home() {
               Own or manage property?
             </h2>
             <p className="mt-2 max-w-lg text-primary-foreground/80">
-              List free, get verified, and receive direct leads from serious
-              tenants and buyers — we never stand between you and your client.
+              List free, get verified, and get direct leads — we stay out of your way.
             </p>
           </div>
           <Button

@@ -44,6 +44,9 @@ export function MobileNav({
             <Link href="/search?purpose=SALE" onClick={close} className="rounded-lg px-3 py-3 text-base font-medium text-foreground hover:bg-muted">
               Buy
             </Link>
+            <Link href="/#student-housing" onClick={close} className="rounded-lg px-3 py-3 text-base font-medium text-foreground hover:bg-muted">
+              Student Housing
+            </Link>
             <Link href="/#how-it-works" onClick={close} className="rounded-lg px-3 py-3 text-base font-medium text-foreground hover:bg-muted">
               How it works
             </Link>

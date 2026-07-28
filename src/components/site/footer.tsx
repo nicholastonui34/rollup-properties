@@ -32,6 +32,7 @@ const COMPANY_COLUMN = {
     { href: "/about", label: "About" },
     { href: "/careers", label: "Careers" },
     { href: "/news", label: "News" },
+    { href: "/investors", label: "Investors" },
   ],
 };
 
@@ -65,6 +66,7 @@ export async function SiteFooter() {
     title: "Partners",
     links: [
       { href: "/advertise", label: "Advertise" },
+      { href: "/agency-websites", label: "Agency Websites" },
       ...(!session?.user
         ? [{ href: "/signup?role=LISTER", label: "List with Us / Pro Media" }]
         : canList
@@ -85,23 +87,29 @@ export async function SiteFooter() {
           </p>
         </div>
 
-        {exploreLinks.length > 0 && (
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-foreground">Explore</h3>
-            <ul className="space-y-2 text-sm">
-              {exploreLinks.map((l) => (
-                <li key={l.href}>
-                  <Link
-                    href={l.href}
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div>
+          <h3 className="mb-3 text-sm font-semibold text-foreground">Explore</h3>
+          <ul className="space-y-2 text-sm">
+            <li>
+              <Link
+                href="/#student-housing"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Student Housing Hub
+              </Link>
+            </li>
+            {exploreLinks.map((l) => (
+              <li key={l.href}>
+                <Link
+                  href={l.href}
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         {footerColumns.map((column) => (
           <div key={column.title}>

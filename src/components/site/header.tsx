@@ -26,6 +26,9 @@ export async function SiteHeader() {
             <Link href="/search?purpose=SALE">Buy</Link>
           </Button>
           <Button asChild variant="ghost" size="lg">
+            <Link href="/#student-housing">Student Housing</Link>
+          </Button>
+          <Button asChild variant="ghost" size="lg">
             <Link href="/#how-it-works">How it works</Link>
           </Button>
         </nav>
