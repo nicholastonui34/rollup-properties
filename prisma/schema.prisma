@@ -103,6 +103,14 @@ enum MediaRequestStatus {
   DELIVERED
 }
 
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  SHORTLISTED
+  APPROVED
+  DECLINED
+}
+
 // Schema-only for now (spec §8): no billing/enforcement wired up, just the
 // data model so a real subscription rail can be added later without another
 // migration. FREE is the only tier actually in effect.
@@ -130,6 +138,16 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Property-manager microsite fields (post_unlock_cta_suite) — only
+  // meaningful for LISTER accounts, but kept on User since a PM is just a
+  // LISTER, not a separate entity. pmSlug is set at signup for LISTER role
+  // (see (auth)/signup/actions.ts) with a lazy-generate fallback via
+  // getOrCreatePmSlug() for any pre-existing accounts that predate this.
+  pmSlug           String?   @unique
+  whatsappPhone    String?
+  whatsappEnabled  Boolean   @default(true)
+  pmBio            String?
+
   listings      Listing[]      @relation("ListerListings")
   verifications Verification[]
   unlocks       Unlock[]
@@ -138,6 +156,9 @@ model User {
   savedSearches SavedSearch[]
   reports       Report[]
   mediaRequests MediaRequest[]
+  tourSlots     TourSlot[]
+  applicationsAsPm        RentalApplication[] @relation("PmApplications")
+  applicationsAsApplicant RentalApplication[] @relation("ApplicantApplications")
 }
 
 model Area {
@@ -206,6 +227,7 @@ model Listing {
   reports       Report[]
   tourRequests  TourRequest[]
   mediaRequests MediaRequest[]
+  rentalApplications RentalApplication[]
 
   @@index([status, purpose, town])
   @@index([areaId])
@@ -236,7 +258,57 @@ model TourRequest {
   status        TourRequestStatus @default(PENDING)
   createdAt     DateTime          @default(now())
 
+  // Only set for VIDEO_CALL bookings made against a PM-published TourSlot
+  // (post_unlock_cta_suite) — slotless video requests (no PM availability)
+  // keep the pre-existing manual-coordination behavior with both null.
+  slotId        String?           @unique
+  slot          TourSlot?         @relation(fields: [slotId], references: [id])
+  videoRoomUrl  String?
+
   @@index([listingId, status])
+}
+
+model TourSlot {
+  id          String       @id @default(cuid())
+  pmId        String
+  pm          User         @relation(fields: [pmId], references: [id])
+  startsAt    DateTime
+  isBooked    Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  tourRequest TourRequest?
+
+  @@index([pmId, startsAt])
+}
+
+model RentalApplication {
+  id                 String             @id @default(cuid())
+  pmId               String
+  pm                 User               @relation("PmApplications", fields: [pmId], references: [id])
+  applicantId        String
+  applicant          User               @relation("ApplicantApplications", fields: [applicantId], references: [id])
+  listingId          String?
+  listing            Listing?           @relation(fields: [listingId], references: [id])
+  fullName           String
+  nationalId         String
+  phone              String
+  email              String
+  occupation         String
+  employer           String
+  monthlyIncomeRange String
+  currentResidence   String
+  desiredMoveInDate  DateTime
+  occupants          Int
+  refereeContact     String
+  idDocumentUrl      String
+  incomeDocumentUrl  String?
+  consentAt          DateTime
+  status             ApplicationStatus  @default(SUBMITTED)
+  statusNote         String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([pmId, status])
+  @@index([applicantId])
 }
 
 model CareerApplication {

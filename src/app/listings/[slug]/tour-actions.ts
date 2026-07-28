@@ -7,9 +7,10 @@ import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { normalizeKenyanPhone, displayPhone } from "@/lib/phone";
 import { sendEmail } from "@/lib/email";
+import { generateVideoRoomUrl } from "@/lib/video-room";
 import { TOUR_TIME_SLOT_LABELS, TOUR_TYPE_LABELS } from "@/lib/listing-options";
 
-export type TourFormState = { error?: string; success?: boolean } | undefined;
+export type TourFormState = { error?: string; success?: boolean; videoRoomUrl?: string } | undefined;
 
 const tourSchema = z.object({
   // Honeypot — real visitors never fill this hidden field; bots that
@@ -31,6 +32,14 @@ const tourSchema = z.object({
   timeSlot: z.enum(["MORNING", "AFTERNOON", "EVENING"]),
   tourType: z.enum(["IN_PERSON", "VIDEO_CALL"]),
   message: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v ? v : undefined)),
+  // Only meaningful for VIDEO_CALL bookings made against a PM-published
+  // TourSlot (post_unlock_cta_suite) — everything else about this schema
+  // and the IN_PERSON flow below is unchanged from before that feature.
+  slotId: z
     .string()
     .trim()
     .optional()
@@ -58,7 +67,7 @@ export async function submitTourRequestAction(
 
   const listing = await prisma.listing.findUnique({
     where: { id: listingId },
-    include: { lister: { select: { name: true, email: true } } },
+    include: { lister: { select: { name: true, email: true, phone: true } } },
   });
   if (!listing || listing.status !== "LIVE") {
     return { error: "This listing isn't accepting tour requests right now." };
@@ -90,6 +99,7 @@ export async function submitTourRequestAction(
     timeSlot: formData.get("timeSlot"),
     tourType: formData.get("tourType"),
     message: formData.get("message") || undefined,
+    slotId: formData.get("slotId") || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
@@ -108,7 +118,7 @@ export async function submitTourRequestAction(
     return { error: "Choose a date within the next 14 days" };
   }
 
-  await prisma.tourRequest.create({
+  let tourRequest = await prisma.tourRequest.create({
     data: {
       listingId,
       name: parsed.data.name,
@@ -120,6 +130,26 @@ export async function submitTourRequestAction(
       message: parsed.data.message ?? null,
     },
   });
+
+  // Additive video-tour-with-availability path — only engages when the
+  // renter picked a real PM-published slot. Slotless VIDEO_CALL (no PM
+  // availability) and every IN_PERSON booking fall through unchanged to the
+  // exact pre-existing manual-coordination email below.
+  let videoRoomUrl: string | undefined;
+  if (parsed.data.tourType === "VIDEO_CALL" && parsed.data.slotId) {
+    const slotId = parsed.data.slotId;
+    const booked = await prisma.$transaction(async (tx) => {
+      const slot = await tx.tourSlot.findUnique({ where: { id: slotId } });
+      if (!slot || slot.pmId !== listing.listerId || slot.isBooked) return null;
+      await tx.tourSlot.update({ where: { id: slotId }, data: { isBooked: true } });
+      videoRoomUrl = generateVideoRoomUrl();
+      return tx.tourRequest.update({
+        where: { id: tourRequest.id },
+        data: { slotId, videoRoomUrl, status: "CONFIRMED" },
+      });
+    });
+    if (booked) tourRequest = booked;
+  }
 
   if (listing.lister.email) {
     const dateLabel = preferredDate.toLocaleDateString("en-KE", {
@@ -137,10 +167,24 @@ export async function submitTourRequestAction(
        <p><strong>Preferred date:</strong> ${dateLabel} (${TOUR_TIME_SLOT_LABELS[parsed.data.timeSlot]})</p>
        ${parsed.data.email ? `<p><strong>Email:</strong> ${parsed.data.email}</p>` : ""}
        ${parsed.data.message ? `<p><strong>Message:</strong> ${parsed.data.message}</p>` : ""}
+       ${videoRoomUrl ? `<p><strong>Video call link:</strong> <a href="${videoRoomUrl}">${videoRoomUrl}</a></p>` : ""}
        <p><a href="${whatsappUrl}">Message ${parsed.data.name} on WhatsApp</a></p>
        <p>Manage this request from your Nyoomba dashboard.</p>`
     );
   }
 
-  return { success: true };
+  if (videoRoomUrl && parsed.data.email) {
+    const pmWhatsappUrl = `https://wa.me/${listing.lister.phone?.replace("+", "") ?? ""}?text=${encodeURIComponent(
+      `Hi, following up on my video tour booking for "${listing.title}" on Nyoomba.`
+    )}`;
+    await sendEmail(
+      parsed.data.email,
+      `Your video tour is confirmed — ${listing.title}`,
+      `<p>Your video tour of <strong>${listing.title}</strong> is confirmed.</p>
+       <p><strong>Join link:</strong> <a href="${videoRoomUrl}">${videoRoomUrl}</a></p>
+       ${listing.lister.phone ? `<p>Trouble connecting? <a href="${pmWhatsappUrl}">Message the manager on WhatsApp</a>.</p>` : ""}`
+    );
+  }
+
+  return { success: true, videoRoomUrl };
 }

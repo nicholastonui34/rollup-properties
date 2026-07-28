@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
@@ -16,12 +17,13 @@ import { daysSince } from "@/lib/dates";
 import { SITE_URL } from "@/lib/site";
 import { initiateUnlockAction } from "./unlock-actions";
 import { UnlockDialog } from "@/components/listing/unlock-dialog";
-import { BookTourDialog } from "@/components/listing/book-tour-dialog";
+import { PostUnlockCtaBar } from "@/components/listing/post-unlock-cta-bar";
 import { RealtorLink } from "@/components/listing/realtor-link";
 import { FavoriteButton } from "@/components/listing/favorite-button";
 import { ReportButton } from "@/components/listing/report-button";
 import { toggleFavoriteAction } from "@/app/favorites/actions";
 import { reportListingAction } from "./report-actions";
+import { getOrCreatePmSlug } from "@/lib/pm";
 
 export async function generateMetadata({
   params,
@@ -60,7 +62,16 @@ export default async function ListingDetailPage({
     where: { slug },
     include: {
       images: { orderBy: { position: "asc" } },
-      lister: { select: { id: true, name: true, phone: true } },
+      lister: {
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          pmSlug: true,
+          whatsappPhone: true,
+          whatsappEnabled: true,
+        },
+      },
       area: true,
     },
   });
@@ -82,6 +93,31 @@ export default async function ListingDetailPage({
         })
       : null;
   const hasAccess = isOwner || isAdmin || Boolean(unlock);
+
+  const pmSlug = hasAccess ? await getOrCreatePmSlug(listing.listerId) : null;
+  const availableSlots = hasAccess
+    ? (
+        await prisma.tourSlot.findMany({
+          where: { pmId: listing.listerId, isBooked: false, startsAt: { gt: new Date() } },
+          orderBy: { startsAt: "asc" },
+          take: 20,
+        })
+      ).map((s) => ({ id: s.id, startsAt: s.startsAt.toISOString() }))
+    : [];
+  const similarListings =
+    hasAccess && listing.status !== "LIVE"
+      ? await prisma.listing.findMany({
+          where: {
+            status: "LIVE",
+            town: listing.town,
+            purpose: listing.purpose,
+            id: { not: listing.id },
+          },
+          include: { images: { where: { isCover: true }, take: 1 } },
+          take: 3,
+          orderBy: { verifiedAt: "desc" },
+        })
+      : [];
 
   const favorite =
     session?.user && !isOwner
@@ -340,6 +376,31 @@ export default async function ListingDetailPage({
                       />
                     </div>
                   )}
+
+                  {!isOwner && pmSlug && (
+                    <div className="mt-4 hidden sm:block">
+                      <PostUnlockCtaBar
+                        listingId={listing.id}
+                        pmSlug={pmSlug}
+                        pmName={listing.lister.name}
+                        listingTitle={title}
+                        listingCode={listing.id.slice(-6).toUpperCase()}
+                        phone={listing.lister.phone}
+                        whatsappPhone={listing.lister.whatsappPhone ?? listing.lister.phone}
+                        whatsappEnabled={listing.lister.whatsappEnabled}
+                        userId={session?.user?.id}
+                        availableSlots={availableSlots}
+                      />
+                    </div>
+                  )}
+
+                  {listing.status !== "LIVE" && (
+                    <div className="mt-4 rounded-lg bg-secondary px-3 py-2 text-left text-xs text-secondary-foreground">
+                      This listing is no longer available. It may have been rented, sold, or taken
+                      down — no refund is issued for past unlocks. Take a look at similar listings
+                      below.
+                    </div>
+                  )}
                 </>
               ) : listing.status !== "LIVE" ? (
                 <>
@@ -378,14 +439,38 @@ export default async function ListingDetailPage({
             </div>
           </div>
 
-          {!isOwner && listing.status === "LIVE" && (
-            hasAccess ? (
-              <BookTourDialog listingId={listing.id} className="hidden w-full sm:flex" />
-            ) : (
-              <Button asChild variant="outline" size="lg" className="hidden w-full sm:flex">
-                <a href="#contact-card">Unlock contact to book a tour</a>
-              </Button>
-            )
+          {!isOwner && !hasAccess && listing.status === "LIVE" && (
+            <Button asChild variant="outline" size="lg" className="hidden w-full sm:flex">
+              <a href="#contact-card">Unlock contact to book a tour</a>
+            </Button>
+          )}
+
+          {hasAccess && similarListings.length > 0 && (
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <p className="text-sm font-medium text-foreground">Similar listings</p>
+              <div className="mt-3 space-y-3">
+                {similarListings.map((s) => (
+                  <Link
+                    key={s.id}
+                    href={`/listings/${s.slug}`}
+                    className="flex items-center gap-3 rounded-lg hover:bg-muted/60"
+                  >
+                    <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-muted">
+                      {s.images[0] && (
+                        <Image src={s.images[0].url} alt="" fill sizes="56px" className="object-cover" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-foreground">{s.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        KES {s.priceKes.toLocaleString()}
+                        {s.purpose === "RENT" ? "/mo" : ""}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
           )}
 
           {isOwner && (
@@ -406,17 +491,30 @@ export default async function ListingDetailPage({
       </div>
 
       {!isOwner && listing.status === "LIVE" && (
-        <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-border bg-background p-3 shadow-lg sm:hidden">
-          {hasAccess ? (
-            <BookTourDialog listingId={listing.id} className="flex-1" />
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background p-3 shadow-lg sm:hidden">
+          {hasAccess && pmSlug ? (
+            <PostUnlockCtaBar
+              listingId={listing.id}
+              pmSlug={pmSlug}
+              pmName={listing.lister.name}
+              listingTitle={title}
+              listingCode={listing.id.slice(-6).toUpperCase()}
+              phone={listing.lister.phone}
+              whatsappPhone={listing.lister.whatsappPhone ?? listing.lister.phone}
+              whatsappEnabled={listing.lister.whatsappEnabled}
+              userId={session?.user?.id}
+              availableSlots={availableSlots}
+            />
           ) : (
-            <Button asChild size="lg" variant="outline" className="flex-1">
-              <a href="#contact-card">Book a Tour</a>
-            </Button>
+            <div className="flex gap-2">
+              <Button asChild size="lg" variant="outline" className="flex-1">
+                <a href="#contact-card">Book a Tour</a>
+              </Button>
+              <Button asChild size="lg" className="flex-1">
+                <a href="#contact-card">Contact</a>
+              </Button>
+            </div>
           )}
-          <Button asChild size="lg" className="flex-1">
-            <a href="#contact-card">Contact</a>
-          </Button>
         </div>
       )}
     </div>
